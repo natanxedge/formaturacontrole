@@ -13,9 +13,25 @@
 
     <style>
         .logo__spin {
+            display: inline-block;
             font-family: 'Alpha Slab One', serif;
             transform: scaleX(1.25);
             transform-origin: left;
+        }
+
+        /* Mantém os anos em uma única linha */
+        #filtro-anos {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+        }
+
+        #filtro-anos::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        #filtro-anos::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -30,56 +46,41 @@
             <!-- BARRA AZUL -->
             <div class="bg-blue-800 text-white px-4 py-5 md:px-6">
 
-                <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-5">
 
-                    <div class="flex items-center gap-5">
+                    <span class="logo__spin text-3xl md:text-4xl tracking-wide">
+                        SPIN
+                    </span>
 
-                        <span class="logo__spin text-3xl md:text-4xl tracking-wide">
-                            SPIN
-                        </span>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold">
+                            Controle de Formandos
+                        </h1>
 
-                        <div>
-                            <h1 class="text-xl md:text-2xl font-bold">
-                                Controle de Formandos
-                            </h1>
-
-                            <p class="text-blue-100 text-sm mt-1">
-                                Alunos, contatos, atendimento e pagamentos
-                            </p>
-                        </div>
-
+                        <p class="text-blue-100 text-xs md:text-sm mt-1">
+                            Alunos, contatos, atendimento e pagamentos
+                        </p>
                     </div>
 
-                    <button id="atualizar-lista" type="button"
-                        class="bg-white text-blue-800 hover:bg-blue-50 font-semibold px-4 py-2 rounded-lg transition">
-                        Atualizar lista
-                    </button>
-
                 </div>
-
-                <p id="estado-conexao" class="text-sm text-blue-100 mt-4" role="status">
-                    Carregando alunos...
-                </p>
 
             </div>
 
             <!-- BARRA GRENÁ -->
-            <div class="bg-rose-800 text-white px-4 py-4 md:px-6">
+            <div class="bg-rose-800 text-white px-3 py-2">
 
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-5">
+                <div class="flex items-center gap-2 md:gap-4 min-w-0">
 
                     <!-- FILTRO DE ANOS -->
-                    <div class="min-w-0">
-
-                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-100 mb-2">
-                            Ano de formação
-                        </p>
+                    <div class="flex-1 min-w-0">
 
                         <div id="filtro-anos"
-                            class="flex items-center gap-2 overflow-x-auto pb-1">
-                            <span class="text-sm text-rose-100">
+                            class="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
+
+                            <span class="text-xs">
                                 Carregando anos...
                             </span>
+
                         </div>
 
                     </div>
@@ -87,25 +88,25 @@
                     <!-- FILTRO DE UNIDADE -->
                     <div class="shrink-0">
 
-                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-100 mb-2">
+                        <p class="text-[10px] font-semibold uppercase text-rose-100 text-center mb-1">
                             Unidade
                         </p>
 
                         <div id="filtro-unidades"
-                            class="inline-flex bg-rose-950 rounded-lg p-1 gap-1">
+                            class="inline-flex bg-rose-950 rounded-md p-0.5 gap-0.5">
 
                             <button type="button" data-unidade="todas"
-                                class="px-3 py-2 text-sm font-semibold rounded-md transition">
+                                class="px-2 py-1 text-xs font-semibold rounded transition">
                                 Todas
                             </button>
 
                             <button type="button" data-unidade="1N"
-                                class="px-3 py-2 text-sm font-semibold rounded-md transition">
+                                class="px-2 py-1 text-xs font-semibold rounded transition">
                                 1N
                             </button>
 
                             <button type="button" data-unidade="RO"
-                                class="px-3 py-2 text-sm font-semibold rounded-md transition">
+                                class="px-2 py-1 text-xs font-semibold rounded transition">
                                 RO
                             </button>
 
@@ -119,8 +120,28 @@
 
         </header>
 
+        <!-- CONTROLES DO CORPO -->
+        <div class="px-4 pt-4 md:px-6">
+
+            <div class="flex flex-wrap items-center gap-3 mb-4">
+
+                <button id="atualizar-lista" type="button"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+                    Atualizar lista
+                </button>
+
+                <span id="estado-conexao"
+                    class="text-xs text-gray-600"
+                    role="status">
+                    Carregando alunos...
+                </span>
+
+            </div>
+
+        </div>
+
         <!-- LISTA DE FORMANDOS -->
-        <div id="lista-formandos" class="space-y-6 p-4 md:p-6"></div>
+        <div id="lista-formandos" class="space-y-6 px-4 pb-6 md:px-6"></div>
 
     </main>
 
@@ -282,7 +303,6 @@
         // ATUALIZAR BOTÕES DOS FILTROS
         function atualizarFiltros() {
 
-            // Identifica os anos existentes na planilha
             const anos = [...new Set(
                 alunos.map(aluno => obterAno(aluno.turma))
             )].sort((a, b) => {
@@ -292,7 +312,6 @@
                 return Number(a) - Number(b);
             });
 
-            // Se o ano selecionado não existir mais, volta para Todos
             if (anoSelecionado !== "todos" && !anos.includes(anoSelecionado)) {
                 anoSelecionado = "todos";
             }
@@ -316,8 +335,10 @@
                 const ativo = anoSelecionado === opcao.valor;
 
                 botao.className = ativo
-                    ? "bg-white text-rose-800 px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap"
-                    : "bg-rose-700 hover:bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition";
+                    ? "bg-white text-rose-800 px-3 py-1.5 rounded-md text-xs font-bold whitespace-nowrap shrink-0"
+                    : "bg-rose-700 hover:bg-rose-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap shrink-0 transition";
+
+                botao.setAttribute("aria-pressed", String(ativo));
 
                 botao.addEventListener("click", () => {
                     anoSelecionado = opcao.valor;
@@ -333,8 +354,8 @@
                 const ativo = botao.dataset.unidade === unidadeSelecionada;
 
                 botao.className = ativo
-                    ? "bg-white text-rose-800 px-3 py-2 text-sm font-bold rounded-md transition"
-                    : "text-white hover:bg-rose-800 px-3 py-2 text-sm font-semibold rounded-md transition";
+                    ? "bg-white text-rose-800 px-2 py-1 text-xs font-bold rounded transition"
+                    : "text-white hover:bg-rose-800 px-2 py-1 text-xs font-semibold rounded transition";
 
                 botao.setAttribute("aria-pressed", String(ativo));
             });
@@ -357,7 +378,6 @@
             container.innerHTML = "";
             alunoAberto = null;
 
-            // Aplica os filtros sem modificar a lista original
             const alunosFiltrados = alunos
                 .map((aluno, index) => ({ ...aluno, index }))
                 .filter(aluno => {
@@ -385,7 +405,6 @@
                 return;
             }
 
-            // Agrupa os alunos por ano
             const anos = {};
 
             alunosFiltrados.forEach(aluno => {
