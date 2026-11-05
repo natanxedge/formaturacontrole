@@ -13,72 +13,81 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
 
-<!-- =========================================
-     FONTES DO LOGO SPIN EDUCACIONAL
-========================================== -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- =========================================
+         FONTES DO LOGO SPIN EDUCACIONAL
+    ========================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Alpha+Slab+One&family=Montserrat:wght@800&display=swap"
-    rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alpha+Slab+One&family=Montserrat:wght@800&display=swap"
+        rel="stylesheet">
 
-/* =========================================
-   CSS DO LOGO SPIN EDUCACIONAL
-========================================= */
 
-.spin-logo {
-    width: 190px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    flex-shrink: 0;
-}
+    <!-- =========================================
+         CSS DO LOGO SPIN EDUCACIONAL
+    ========================================== -->
+    <style>
+        /* Estrutura geral do logo */
+        .spin-logo {
+            width: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            flex-shrink: 0;
 
-/* SPIN - Logo superior */
-.spin-logo__name {
-    font-family: 'Alpha Slab One', serif;
-    font-size: clamp(2.5rem, 5vw, 3.3rem);
-    font-weight: 400;
-    color: #000000;
-    text-align: center;
-    line-height: 0.95;
-    letter-spacing: -1px;
-    transform: scaleY(1.12);
-    transform-origin: center bottom;
-}
+            /* Fundo para destacar o logo no cabeçalho azul */
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 4px;
+        }
 
-/* EDUCACIONAL - Faixa inferior */
-.spin-logo__subtitle {
-    width: 100%;
-    background: #000000;
-    color: #ffffff;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 800;
-    font-size: clamp(0.75rem, 1.5vw, 0.95rem);
-    text-align: center;
-    white-space: nowrap;
-    padding: 0.12em 0.08em;
-    line-height: 1.35;
-    margin-top: 4px;
-}
+        /* SPIN - Logo superior */
+        .spin-logo__name {
+            font-family: 'Alpha Slab One', serif;
+            font-size: clamp(2.5rem, 5vw, 3.3rem);
+            font-weight: 400;
+            color: #000000;
+            text-align: center;
+            line-height: 0.95;
+            letter-spacing: -1px;
+            transform: scaleY(1.12);
+            transform-origin: center bottom;
+        }
 
-/* Responsividade do logo */
-@media (max-width: 480px) {
-    .spin-logo {
-        width: 112px;
-    }
+        /* EDUCACIONAL - Faixa inferior */
+        .spin-logo__subtitle {
+            width: 100%;
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+            text-align: center;
+            white-space: nowrap;
+            padding: 0.12em 0.08em;
+            line-height: 1.35;
+            margin-top: 4px;
+        }
 
-    .spin-logo__name {
-        font-size: 2.1rem;
-        letter-spacing: -1px;
-    }
+        /* Responsividade do logo */
+        @media (max-width: 480px) {
+            .spin-logo {
+                width: 112px;
+                padding: 5px;
+            }
 
-    .spin-logo__subtitle {
-        font-size: 0.58rem;
-        padding: 0.15em 0.03em;
-        letter-spacing: 0;
-    }
-}
+            .spin-logo__name {
+                font-size: 2.1rem;
+                letter-spacing: -1px;
+            }
+
+            .spin-logo__subtitle {
+                font-size: 0.58rem;
+                padding: 0.15em 0.03em;
+                letter-spacing: 0;
+            }
+        }
+    </style>
 
 
     <!-- =========================================
