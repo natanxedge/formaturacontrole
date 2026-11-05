@@ -244,57 +244,18 @@
 
         function obterAno(turma) {
 
-            const valor = normalizarTexto(turma);
+            const valor = normalizarTexto(turma)
+                .replace(/\\s+/g, "");
 
-            if (!valor) return "";
+            const turmas = {
+                "pre2": "Pré-2",
+                "1ano": "1",
+                "5ano": "5",
+                "9ano": "9",
+                "3ano": "3"
+            };
 
-            // PRÉ-2
-            if (
-                /pre\s*[-ºª°]?\s*0?2/.test(valor) ||
-                /pre\s*ii/.test(valor)
-            ) {
-                return "Pré-2";
-            }
-
-            // Identifica números associados a ANO ou SÉRIE.
-            // Exemplos:
-            // 1º Ano
-            // 5º Ano
-            // 9º Ano
-            // 3º Ano
-            // 2027 - 1º Ano
-            // 1ª Série
-
-            const correspondencia = valor.match(
-                /(?:^|[^\d])([1-9])\s*(?:º|ª|°|o)?\s*(?:ano|anos|serie|série)\b/
-            );
-
-            if (correspondencia) {
-                return correspondencia[1];
-            }
-
-            // Formato ordinal sem a palavra Ano.
-            const ordinal = valor.match(
-                /(?:^|[^\d])([1-9])\s*(?:º|ª|°|o)(?:\s|$)/
-            );
-
-            if (ordinal) {
-                return ordinal[1];
-            }
-
-            // Campo contendo apenas o número.
-            if (/^[1-9]$/.test(valor)) {
-                return valor;
-            }
-
-            // Formatos como 1A, 5A, 9A ou 3A.
-            const turmaLetra = valor.match(/^([1-9])\s*[a-z]$/);
-
-            if (turmaLetra) {
-                return turmaLetra[1];
-            }
-
-            return "";
+            return turmas[valor] || "";
         }
 
         // =============================================
