@@ -9,7 +9,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- FONTES DO LOGO -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -93,10 +92,8 @@
 
     <main class="max-w-4xl mx-auto">
 
-        <!-- CABEÇALHO -->
         <header>
 
-            <!-- BARRA AZUL -->
             <div class="bg-blue-800 text-white px-4 py-5 md:px-6">
 
                 <div class="flex items-center gap-5">
@@ -129,7 +126,8 @@
 
             </div>
 
-            <!-- BARRA DE FILTROS -->
+            <!-- FILTROS -->
+
             <div class="bg-rose-800 text-white px-3 py-2">
 
                 <div class="flex items-center gap-2 md:gap-4 min-w-0">
@@ -147,7 +145,8 @@
 
                     </div>
 
-                    <!-- FILTRO DE UNIDADE -->
+                    <!-- UNIDADES -->
+
                     <div class="shrink-0">
 
                         <p class="text-[10px] font-semibold uppercase text-rose-100 text-center mb-1">
@@ -156,11 +155,6 @@
 
                         <div id="filtro-unidades"
                             class="inline-flex bg-rose-950 rounded-md p-0.5 gap-0.5">
-
-                            <button type="button" data-unidade="todas"
-                                class="px-2 py-1 text-xs font-semibold rounded transition">
-                                Todas
-                            </button>
 
                             <button type="button" data-unidade="1N"
                                 class="px-2 py-1 text-xs font-semibold rounded transition">
@@ -183,6 +177,7 @@
         </header>
 
         <!-- CONTROLES -->
+
         <div class="px-4 pt-4 md:px-6">
 
             <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -206,7 +201,8 @@
 
         </div>
 
-        <!-- LISTA DE FORMANDOS -->
+        <!-- LISTA -->
+
         <div id="lista-formandos"
             class="space-y-6 px-4 pb-6 md:px-6">
         </div>
@@ -225,11 +221,21 @@
         const mensagemPadrao =
             "Olá! Estamos entrando em contato sobre a formatura escolar. Tudo bem?";
 
+        // ORDEM FIXA DA NAVEGAÇÃO
+        const ORDEM_ANOS = [
+            "Pré-2",
+            "1",
+            "5",
+            "9",
+            "3"
+        ];
+
         let alunos = [];
         let alunoAberto = null;
 
-        let anoSelecionado = "todos";
-        let unidadeSelecionada = "todas";
+        // Não existe mais opção "todos"
+        let anoSelecionado = "Pré-2";
+        let unidadeSelecionada = "1N";
 
         const container = document.getElementById("lista-formandos");
         const estadoConexao = document.getElementById("estado-conexao");
@@ -252,63 +258,49 @@
         }
 
 
-        // Identifica o ano de formação a partir da turma
-function obterAno(turma) {
+        // =============================================
+        // IDENTIFICAR ANO
+        // =============================================
 
-    const valor = String(turma ?? "")
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
+        function obterAno(turma) {
 
-    if (!valor) return "Sem ano";
+            const valor = String(turma ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase();
 
-    // Identifica turmas da educação infantil
-    // Aceita: Pré-2, Pre 2, Pre-02, PRE2, Pré II etc.
-    const turmaPre = valor.replace(/[^a-z0-9]/g, "");
+            if (!valor) return "Sem ano";
 
-    if (/^pre0?2$/.test(turmaPre) || /^preii$/.test(turmaPre)) {
-        return "Pré-2";
-    }
+            const turmaPre = valor.replace(/[^a-z0-9]/g, "");
 
-    // Identifica turmas com a palavra pré
-    if (/\bpre\b/.test(valor) && /\b0?2\b/.test(valor)) {
-        return "Pré-2";
-    }
+            if (/pre0?2/.test(turmaPre) || /preii/.test(turmaPre)) {
+                return "Pré-2";
+            }
 
-    // Identifica os demais anos
-    const correspondencia = valor.match(/\d+/);
+            const correspondencia = valor.match(/\d+/);
 
-    if (!correspondencia) return "Sem ano";
+            if (!correspondencia) return "Sem ano";
 
-    const numeroTexto = correspondencia[0];
-    const numero = Number(numeroTexto);
+            const numeroTexto = correspondencia[0];
+            const numero = Number(numeroTexto);
 
-    if (numeroTexto.length >= 4) {
-        return String(Number(numeroTexto[0]));
-    }
+            if (numeroTexto.length >= 4) {
+                return String(Number(numeroTexto[0]));
+            }
 
-    if (numero >= 100) {
-        return String(Math.floor(numero / 100));
-    }
+            if (numero >= 100) {
+                return String(Math.floor(numero / 100));
+            }
 
-    return String(numero);
-}
-
-        // Ordenação dos anos
-        function ordenarAnos(a, b) {
-
-            if (a === "Pré-2") return -1;
-            if (b === "Pré-2") return 1;
-
-            if (a === "Sem ano") return 1;
-            if (b === "Sem ano") return -1;
-
-            return Number(a) - Number(b);
+            return String(numero);
         }
 
 
-        // Nome exibido nos filtros e agrupamentos
+        // =============================================
+        // NOME DO ANO
+        // =============================================
+
         function nomeAno(ano) {
 
             if (ano === "Pré-2") return "Pré-2";
@@ -318,7 +310,10 @@ function obterAno(turma) {
         }
 
 
-        // Padroniza unidade
+        // =============================================
+        // UNIDADE
+        // =============================================
+
         function obterUnidade(unidade) {
 
             const valor = String(unidade ?? "")
@@ -347,7 +342,10 @@ function obterAno(turma) {
         }
 
 
-        // Normaliza telefone
+        // =============================================
+        // TELEFONES
+        // =============================================
+
         function normalizarTelefone(telefone) {
 
             let numero = String(telefone ?? "").replace(/\D/g, "");
@@ -360,7 +358,6 @@ function obterAno(turma) {
         }
 
 
-        // Gera link do WhatsApp
         function gerarLink(telefone, mensagem = "") {
 
             const numero = normalizarTelefone(telefone);
@@ -403,7 +400,8 @@ function obterAno(turma) {
                 ) {
 
                     estadoConexao.textContent =
-                        resposta?.erro || "A API retornou uma resposta inválida.";
+                        resposta?.mensagem || resposta?.erro ||
+                        "A API retornou uma resposta inválida.";
 
                     return;
                 }
@@ -462,45 +460,31 @@ function obterAno(turma) {
 
 
         // =============================================
-        // FILTROS - ANOS E UNIDADES
+        // FILTROS
         // =============================================
 
         function atualizarFiltros() {
 
-            const anos = [...new Set(
-                alunos.map(aluno => obterAno(aluno.turma))
-            )].sort(ordenarAnos);
-
-
-            if (
-                anoSelecionado !== "todos" &&
-                !anos.includes(anoSelecionado)
-            ) {
-                anoSelecionado = "todos";
-            }
-
-
             filtroAnos.innerHTML = "";
 
 
-            const opcoesAno = [
-                { valor: "todos", texto: "Todos" },
+            // Exibe somente os cinco anos definidos,
+            // sempre na ordem solicitada.
 
-                ...anos.map(ano => ({
-                    valor: ano,
-                    texto: nomeAno(ano)
-                }))
-            ];
+            ORDEM_ANOS.forEach(ano => {
 
+                const existe = alunos.some(aluno =>
+                    obterAno(aluno.turma) === ano
+                );
 
-            opcoesAno.forEach(opcao => {
+                if (!existe) return;
 
                 const botao = document.createElement("button");
 
                 botao.type = "button";
-                botao.textContent = opcao.texto;
+                botao.textContent = nomeAno(ano);
 
-                const ativo = anoSelecionado === opcao.valor;
+                const ativo = anoSelecionado === ano;
 
                 botao.className = ativo
                     ? "bg-white text-rose-800 px-3 py-1.5 rounded-md text-xs font-bold whitespace-nowrap shrink-0"
@@ -510,7 +494,7 @@ function obterAno(turma) {
 
                 botao.addEventListener("click", () => {
 
-                    anoSelecionado = opcao.valor;
+                    anoSelecionado = ano;
 
                     atualizarFiltros();
                     renderizarLista();
@@ -522,7 +506,21 @@ function obterAno(turma) {
             });
 
 
-            // Atualizar unidades
+            // Se o ano selecionado não tiver mais alunos,
+            // seleciona o primeiro ano disponível.
+
+            const anosDisponiveis = ORDEM_ANOS.filter(ano =>
+                alunos.some(aluno => obterAno(aluno.turma) === ano)
+            );
+
+            if (!anosDisponiveis.includes(anoSelecionado) && anosDisponiveis.length) {
+                anoSelecionado = anosDisponiveis[0];
+                atualizarFiltros();
+            }
+
+
+            // Atualizar unidade selecionada
+
             filtroUnidades.querySelectorAll("[data-unidade]").forEach(botao => {
 
                 const ativo = botao.dataset.unidade === unidadeSelecionada;
@@ -557,7 +555,7 @@ function obterAno(turma) {
 
 
         // =============================================
-        // RENDERIZAR LISTA DE FORMANDOS
+        // RENDERIZAR LISTA
         // =============================================
 
         function renderizarLista() {
@@ -573,13 +571,8 @@ function obterAno(turma) {
                     const ano = obterAno(aluno.turma);
                     const unidade = obterUnidade(aluno.unidade);
 
-                    const correspondeAno =
-                        anoSelecionado === "todos" ||
-                        ano === anoSelecionado;
-
-                    const correspondeUnidade =
-                        unidadeSelecionada === "todas" ||
-                        unidade === unidadeSelecionada;
+                    const correspondeAno = ano === anoSelecionado;
+                    const correspondeUnidade = unidade === unidadeSelecionada;
 
                     return correspondeAno && correspondeUnidade;
 
@@ -598,7 +591,6 @@ function obterAno(turma) {
             }
 
 
-            // Agrupar por ano/turma
             const anos = {};
 
             alunosFiltrados.forEach(aluno => {
@@ -614,8 +606,7 @@ function obterAno(turma) {
             });
 
 
-            // Criar cartões dos anos
-            Object.keys(anos).sort(ordenarAnos).forEach(ano => {
+            Object.keys(anos).forEach(ano => {
 
                 const cardAno = document.createElement("section");
 
@@ -645,7 +636,6 @@ function obterAno(turma) {
                 const lista = cardAno.querySelector("[data-lista-ano]");
 
 
-                // Cartões individuais
                 anos[ano].forEach(aluno => {
 
                     const cartao = document.createElement("article");
@@ -655,8 +645,6 @@ function obterAno(turma) {
 
 
                     cartao.innerHTML = `
-
-                        <!-- CABEÇALHO DO ALUNO -->
 
                         <button type="button"
                             onclick="alternarAluno(${aluno.index})"
@@ -672,13 +660,10 @@ function obterAno(turma) {
                         </button>
 
 
-                        <!-- DETALHES -->
-
                         <div id="detalhes-${aluno.index}"
                             class="hidden border-t border-gray-200 p-4 bg-gray-50">
 
                             <div class="space-y-4">
-
 
                                 <!-- INFORMAÇÕES PRINCIPAIS -->
 
@@ -694,7 +679,6 @@ function obterAno(turma) {
                                         </p>
                                     </div>
 
-
                                     <div>
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
                                             Turma
@@ -705,7 +689,6 @@ function obterAno(turma) {
                                         </p>
                                     </div>
 
-
                                     <div>
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
                                             Unidade
@@ -715,7 +698,6 @@ function obterAno(turma) {
                                             ${escaparHTML(aluno.unidade || "Não informada")}
                                         </p>
                                     </div>
-
 
                                     <div>
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
@@ -774,14 +756,14 @@ function obterAno(turma) {
                                 </div>
 
 
-                                <!-- OBSERVAÇÃO -->
+                                <!-- OBSERVAÇÕES -->
 
                                 <div>
 
                                     <label for="observacao-${aluno.index}"
                                         class="block text-xs text-gray-500 uppercase font-semibold mb-1">
 
-                                        Observação
+                                        Observações
 
                                     </label>
 
@@ -859,7 +841,7 @@ function obterAno(turma) {
                                 </div>
 
 
-                                <!-- MENSAGEM DO WHATSAPP -->
+                                <!-- MENSAGEM WHATSAPP -->
 
                                 <div>
 
@@ -884,7 +866,7 @@ function obterAno(turma) {
                                 </div>
 
 
-                                <!-- BOTÕES WHATSAPP -->
+                                <!-- WHATSAPP -->
 
                                 <div class="flex flex-col sm:flex-row gap-2">
 
@@ -910,12 +892,9 @@ function obterAno(turma) {
                                 </div>
 
 
-                                <!-- STATUS DE SALVAMENTO -->
-
                                 <p id="status-salvamento-${aluno.index}"
                                     class="text-xs text-gray-500"
                                     aria-live="polite"></p>
-
 
                             </div>
 
@@ -927,9 +906,7 @@ function obterAno(turma) {
                     lista.appendChild(cartao);
 
 
-                    // =================================
-                    // TELEFONES DO ALUNO
-                    // =================================
+                    // TELEFONES
 
                     const listaTelefones =
                         cartao.querySelector(`#telefones-${aluno.index}`);
@@ -1021,7 +998,7 @@ function obterAno(turma) {
 
 
         // =============================================
-        // ATUALIZAR LINK DO WHATSAPP
+        // ATUALIZAR LINK WHATSAPP
         // =============================================
 
         function atualizarMensagem(index) {
@@ -1089,7 +1066,7 @@ function obterAno(turma) {
 
 
         // =============================================
-        // SALVAR STATUS NA PLANILHA
+        // SALVAR STATUS
         // =============================================
 
         async function salvarStatus(index, campo, valor) {
@@ -1159,7 +1136,7 @@ function obterAno(turma) {
 
 
         // =============================================
-        // BOTÃO ATUALIZAR LISTA
+        // BOTÃO ATUALIZAR
         // =============================================
 
         document.getElementById("atualizar-lista")
