@@ -85,13 +85,13 @@
             border-radius: 10px;
         }
     </style>
-
 </head>
 
 <body class="bg-gray-100 min-h-screen">
 
     <main class="max-w-4xl mx-auto">
 
+        <!-- CABEÇALHO -->
         <header>
 
             <div class="bg-blue-800 text-white px-4 py-5 md:px-6">
@@ -127,7 +127,6 @@
             </div>
 
             <!-- FILTROS -->
-
             <div class="bg-rose-800 text-white px-3 py-2">
 
                 <div class="flex items-center gap-2 md:gap-4 min-w-0">
@@ -136,17 +135,11 @@
 
                         <div id="filtro-anos"
                             class="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
-
-                            <span class="text-xs">
-                                Carregando anos...
-                            </span>
-
                         </div>
 
                     </div>
 
                     <!-- UNIDADES -->
-
                     <div class="shrink-0">
 
                         <p class="text-[10px] font-semibold uppercase text-rose-100 text-center mb-1">
@@ -177,24 +170,19 @@
         </header>
 
         <!-- CONTROLES -->
-
         <div class="px-4 pt-4 md:px-6">
 
             <div class="flex flex-wrap items-center gap-3 mb-4">
 
                 <button id="atualizar-lista" type="button"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
-
                     Atualizar lista
-
                 </button>
 
                 <span id="estado-conexao"
                     class="text-xs text-gray-600"
                     role="status">
-
                     Carregando alunos...
-
                 </span>
 
             </div>
@@ -202,13 +190,11 @@
         </div>
 
         <!-- LISTA -->
-
         <div id="lista-formandos"
             class="space-y-6 px-4 pb-6 md:px-6">
         </div>
 
     </main>
-
 
     <script>
 
@@ -233,7 +219,6 @@
         let alunos = [];
         let alunoAberto = null;
 
-        // Não existe mais opção "todos"
         let anoSelecionado = "Pré-2";
         let unidadeSelecionada = "1N";
 
@@ -244,7 +229,7 @@
 
 
         // =============================================
-        // FUNÇÕES AUXILIARES
+        // ESCAPAR HTML
         // =============================================
 
         function escaparHTML(valor) {
@@ -272,12 +257,38 @@
 
             if (!valor) return "Sem ano";
 
+            // Identificação do Pré-2
             const turmaPre = valor.replace(/[^a-z0-9]/g, "");
 
-            if (/pre0?2/.test(turmaPre) || /preii/.test(turmaPre)) {
+            if (
+                /^pre0?2$/.test(turmaPre) ||
+                /^preii$/.test(turmaPre) ||
+                (/\bpre\b/.test(valor) && /\b0?2\b/.test(valor))
+            ) {
                 return "Pré-2";
             }
 
+            // Identifica o ano quando aparece junto da palavra "ano"
+            // Exemplo: 1º Ano, 5º Ano, 2026 - 3º Ano
+            const correspondenciaAno = valor.match(
+                /(?:^|\D)(\d{1,2})\s*(?:º|°|o)?\s*ano\b/
+            );
+
+            if (correspondenciaAno) {
+                return String(Number(correspondenciaAno[1]));
+            }
+
+            // Identifica formatos ordinais como 1º, 5° ou 9o
+            const correspondenciaOrdinal = valor.match(
+                /(?:^|\D)([1-9])\s*(?:º|°|o)(?:\s|$)/
+            );
+
+            if (correspondenciaOrdinal) {
+                return String(Number(correspondenciaOrdinal[1]));
+            }
+
+            // Mantém o comportamento anterior para os demais formatos:
+            // identifica o primeiro número da turma.
             const correspondencia = valor.match(/\d+/);
 
             if (!correspondencia) return "Sem ano";
@@ -400,12 +411,12 @@
                 ) {
 
                     estadoConexao.textContent =
-                        resposta?.mensagem || resposta?.erro ||
+                        resposta?.mensagem ||
+                        resposta?.erro ||
                         "A API retornou uma resposta inválida.";
 
                     return;
                 }
-
 
                 alunos = resposta.alunos.map(aluno => {
 
@@ -441,7 +452,6 @@
 
                 });
 
-
                 atualizarFiltros();
                 renderizarLista();
 
@@ -467,17 +477,8 @@
 
             filtroAnos.innerHTML = "";
 
-
-            // Exibe somente os cinco anos definidos,
-            // sempre na ordem solicitada.
-
+            // Exibe os cinco anos sempre na ordem solicitada
             ORDEM_ANOS.forEach(ano => {
-
-                const existe = alunos.some(aluno =>
-                    obterAno(aluno.turma) === ano
-                );
-
-                if (!existe) return;
 
                 const botao = document.createElement("button");
 
@@ -505,22 +506,7 @@
 
             });
 
-
-            // Se o ano selecionado não tiver mais alunos,
-            // seleciona o primeiro ano disponível.
-
-            const anosDisponiveis = ORDEM_ANOS.filter(ano =>
-                alunos.some(aluno => obterAno(aluno.turma) === ano)
-            );
-
-            if (!anosDisponiveis.includes(anoSelecionado) && anosDisponiveis.length) {
-                anoSelecionado = anosDisponiveis[0];
-                atualizarFiltros();
-            }
-
-
-            // Atualizar unidade selecionada
-
+            // Atualiza unidade selecionada
             filtroUnidades.querySelectorAll("[data-unidade]").forEach(botao => {
 
                 const ativo = botao.dataset.unidade === unidadeSelecionada;
@@ -563,7 +549,6 @@
             container.innerHTML = "";
             alunoAberto = null;
 
-
             const alunosFiltrados = alunos
                 .map((aluno, index) => ({ ...aluno, index }))
                 .filter(aluno => {
@@ -578,7 +563,6 @@
 
                 });
 
-
             if (alunosFiltrados.length === 0) {
 
                 container.innerHTML = `
@@ -589,7 +573,6 @@
 
                 return;
             }
-
 
             const anos = {};
 
@@ -604,7 +587,6 @@
                 anos[ano].push(aluno);
 
             });
-
 
             Object.keys(anos).forEach(ano => {
 
@@ -635,7 +617,6 @@
 
                 const lista = cardAno.querySelector("[data-lista-ano]");
 
-
                 anos[ano].forEach(aluno => {
 
                     const cartao = document.createElement("article");
@@ -643,8 +624,9 @@
                     cartao.className =
                         "border border-gray-200 rounded-lg overflow-hidden";
 
-
                     cartao.innerHTML = `
+
+                        <!-- CABEÇALHO DO ALUNO -->
 
                         <button type="button"
                             onclick="alternarAluno(${aluno.index})"
@@ -659,6 +641,7 @@
 
                         </button>
 
+                        <!-- DETALHES -->
 
                         <div id="detalhes-${aluno.index}"
                             class="hidden border-t border-gray-200 p-4 bg-gray-50">
@@ -711,7 +694,6 @@
 
                                 </div>
 
-
                                 <!-- CONVIDADOS E FOTO LEMBRANÇA -->
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -720,9 +702,7 @@
 
                                         <label for="convidados-${aluno.index}"
                                             class="block text-xs text-gray-500 uppercase font-semibold mb-1">
-
                                             Convidados
-
                                         </label>
 
                                         <input
@@ -734,14 +714,11 @@
 
                                     </div>
 
-
                                     <div>
 
                                         <label for="foto-${aluno.index}"
                                             class="block text-xs text-gray-500 uppercase font-semibold mb-1">
-
                                             Foto lembrança
-
                                         </label>
 
                                         <input
@@ -755,16 +732,13 @@
 
                                 </div>
 
-
                                 <!-- OBSERVAÇÕES -->
 
                                 <div>
 
                                     <label for="observacao-${aluno.index}"
                                         class="block text-xs text-gray-500 uppercase font-semibold mb-1">
-
                                         Observações
-
                                     </label>
 
                                     <textarea
@@ -774,7 +748,6 @@
                                         class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white text-gray-800 resize-none focus:outline-none">${escaparHTML(aluno.observacao)}</textarea>
 
                                 </div>
-
 
                                 <!-- ATENDIMENTO E PAGAMENTO -->
 
@@ -802,7 +775,6 @@
 
                                     </label>
 
-
                                     <label class="block">
 
                                         <span class="text-xs text-gray-500 uppercase font-semibold">
@@ -827,7 +799,6 @@
 
                                 </div>
 
-
                                 <!-- TELEFONES -->
 
                                 <div>
@@ -839,7 +810,6 @@
                                     <div class="space-y-2" id="telefones-${aluno.index}"></div>
 
                                 </div>
-
 
                                 <!-- MENSAGEM WHATSAPP -->
 
@@ -857,14 +827,12 @@
 
                                     </label>
 
-
                                     <textarea id="mensagem-${aluno.index}"
                                         rows="3"
                                         oninput="atualizarMensagem(${aluno.index})"
                                         class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">${escaparHTML(mensagemPadrao)}</textarea>
 
                                 </div>
-
 
                                 <!-- WHATSAPP -->
 
@@ -875,22 +843,16 @@
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         class="flex-1 text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">
-
                                         Abrir WhatsApp
-
                                     </a>
-
 
                                     <button type="button"
                                         onclick="abrirWhatsApp(${aluno.index}, false)"
                                         class="flex-1 border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg transition">
-
                                         Somente telefone
-
                                     </button>
 
                                 </div>
-
 
                                 <p id="status-salvamento-${aluno.index}"
                                     class="text-xs text-gray-500"
@@ -902,15 +864,12 @@
 
                     `;
 
-
                     lista.appendChild(cartao);
 
-
-                    // TELEFONES
+                    // TELEFONES DO ALUNO
 
                     const listaTelefones =
                         cartao.querySelector(`#telefones-${aluno.index}`);
-
 
                     aluno.telefones.forEach((telefone, i) => {
 
@@ -920,7 +879,6 @@
 
                         opcao.className =
                             "flex items-center gap-3 bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-400";
-
 
                         opcao.innerHTML = `
 
@@ -940,7 +898,6 @@
                         listaTelefones.appendChild(opcao);
 
                     });
-
 
                     if (aluno.telefones.length === 0) {
 
@@ -977,7 +934,6 @@
                 }
 
             }
-
 
             if (alunoAberto === index) {
 
@@ -1016,13 +972,11 @@
                 return;
             }
 
-
             const usarMensagem =
                 document.getElementById(`usar-mensagem-${index}`).checked;
 
             const mensagem =
                 document.getElementById(`mensagem-${index}`).value;
-
 
             link.href = gerarLink(
                 telefone.value,
@@ -1042,7 +996,6 @@
                 `input[name="telefone-${index}"]:checked`
             );
 
-
             if (!telefone) {
 
                 alert("Este aluno não possui telefone cadastrado.");
@@ -1050,11 +1003,9 @@
                 return;
             }
 
-
             const mensagem = comMensagem
                 ? document.getElementById(`mensagem-${index}`).value
                 : "";
-
 
             window.open(
                 gerarLink(telefone.value, mensagem),
@@ -1066,7 +1017,7 @@
 
 
         // =============================================
-        // SALVAR STATUS
+        // SALVAR STATUS NA PLANILHA
         // =============================================
 
         async function salvarStatus(index, campo, valor) {
@@ -1076,23 +1027,16 @@
             const aviso =
                 document.getElementById(`status-salvamento-${index}`);
 
-
             const valoresPermitidos = {
-
                 atendimento: ["tratamento", "resolvido"],
-
                 pagamento: ["pendente", "pago"]
-
             };
-
 
             if (!aluno || !valoresPermitidos[campo]?.includes(valor)) {
                 return;
             }
 
-
             aviso.textContent = "Enviando alteração...";
-
 
             try {
 
@@ -1107,23 +1051,16 @@
                     },
 
                     body: JSON.stringify({
-
                         acao: "atualizarStatus",
-
                         id: aluno.id,
-
                         campo,
-
                         valor
-
                     })
 
                 });
 
-
                 aviso.textContent =
                     "Solicitação enviada. Atualize a lista para conferir se a planilha recebeu a alteração.";
-
 
             } catch (erro) {
 
