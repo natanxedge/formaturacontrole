@@ -249,8 +249,8 @@ function obterAno(turma) {
     return numero === "2" ? "Pré-2" : (numero || "");
 }
 
-    return "";
-}
+        return turmas[valor] || "";   // <-- sobra da função antiga
+}                                      // <-- chave sobrando
 
         // =============================================
         // NOME DO ANO
