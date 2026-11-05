@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -5,24 +6,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Formandos</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Alpha+Slab+One&display=swap" rel="stylesheet">
+
+    <style>
+        .logo__spin {
+            font-family: 'Alpha Slab One', serif;
+            transform: scaleX(1.25);
+            transform-origin: left;
+        }
+    </style>
 </head>
 
-<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+<body class="bg-gray-100 min-h-screen">
+
     <main class="max-w-4xl mx-auto">
-        <header class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Controle de Formandos</h1>
-            <p class="text-gray-500 mt-1">Alunos, contatos, atendimento e pagamentos</p>
-            <div class="mt-4 flex flex-wrap items-center gap-3">
-                <button id="atualizar-lista" type="button"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg">
-                    Atualizar lista
-                </button>
-                <span id="estado-conexao" class="text-sm text-gray-600" role="status">Carregando alunos...</span>
+
+        <!-- CABEÇALHO -->
+        <header>
+
+            <!-- BARRA AZUL -->
+            <div class="bg-blue-800 text-white px-4 py-5 md:px-6">
+
+                <div class="flex flex-wrap items-center justify-between gap-4">
+
+                    <div class="flex items-center gap-5">
+
+                        <span class="logo__spin text-3xl md:text-4xl tracking-wide">
+                            SPIN
+                        </span>
+
+                        <div>
+                            <h1 class="text-xl md:text-2xl font-bold">
+                                Controle de Formandos
+                            </h1>
+
+                            <p class="text-blue-100 text-sm mt-1">
+                                Alunos, contatos, atendimento e pagamentos
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <button id="atualizar-lista" type="button"
+                        class="bg-white text-blue-800 hover:bg-blue-50 font-semibold px-4 py-2 rounded-lg transition">
+                        Atualizar lista
+                    </button>
+
+                </div>
+
+                <p id="estado-conexao" class="text-sm text-blue-100 mt-4" role="status">
+                    Carregando alunos...
+                </p>
+
             </div>
+
+            <!-- BARRA GRENÁ -->
+            <div class="bg-rose-800 text-white px-4 py-4 md:px-6">
+
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-5">
+
+                    <!-- FILTRO DE ANOS -->
+                    <div class="min-w-0">
+
+                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-100 mb-2">
+                            Ano de formação
+                        </p>
+
+                        <div id="filtro-anos"
+                            class="flex items-center gap-2 overflow-x-auto pb-1">
+                            <span class="text-sm text-rose-100">
+                                Carregando anos...
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <!-- FILTRO DE UNIDADE -->
+                    <div class="shrink-0">
+
+                        <p class="text-xs font-semibold uppercase tracking-wider text-rose-100 mb-2">
+                            Unidade
+                        </p>
+
+                        <div id="filtro-unidades"
+                            class="inline-flex bg-rose-950 rounded-lg p-1 gap-1">
+
+                            <button type="button" data-unidade="todas"
+                                class="px-3 py-2 text-sm font-semibold rounded-md transition">
+                                Todas
+                            </button>
+
+                            <button type="button" data-unidade="1N"
+                                class="px-3 py-2 text-sm font-semibold rounded-md transition">
+                                1N
+                            </button>
+
+                            <button type="button" data-unidade="RO"
+                                class="px-3 py-2 text-sm font-semibold rounded-md transition">
+                                RO
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </header>
 
-        <div id="lista-formandos" class="space-y-6"></div>
+        <!-- LISTA DE FORMANDOS -->
+        <div id="lista-formandos" class="space-y-6 p-4 md:p-6"></div>
+
     </main>
 
     <script>
@@ -35,8 +134,14 @@
         let alunos = [];
         let alunoAberto = null;
 
+        // Filtros selecionados
+        let anoSelecionado = "todos";
+        let unidadeSelecionada = "todas";
+
         const container = document.getElementById("lista-formandos");
         const estadoConexao = document.getElementById("estado-conexao");
+        const filtroAnos = document.getElementById("filtro-anos");
+        const filtroUnidades = document.getElementById("filtro-unidades");
 
         function escaparHTML(valor) {
             return String(valor ?? "").replace(/[&<>"']/g, caractere => ({
@@ -48,28 +153,82 @@
             })[caractere]);
         }
 
+        // Identifica o ano de formação a partir da turma
         function obterAno(turma) {
             const valor = String(turma ?? "").trim();
+
             if (!valor) return "Sem ano";
-            if (/^\d{4,}$/.test(valor)) return String(Number(valor[0]));
-            const numero = Number(valor);
-            return Number.isFinite(numero) ? String(Math.floor(numero / 100)) : "Sem ano";
+
+            const correspondencia = valor.match(/\d+/);
+
+            if (!correspondencia) return "Sem ano";
+
+            const numeroTexto = correspondencia[0];
+            const numero = Number(numeroTexto);
+
+            if (numeroTexto.length >= 4) {
+                return String(Number(numeroTexto[0]));
+            }
+
+            if (numero >= 100) {
+                return String(Math.floor(numero / 100));
+            }
+
+            return String(numero);
+        }
+
+        // Padroniza a identificação da unidade
+        function obterUnidade(unidade) {
+            const valor = String(unidade ?? "")
+                .trim()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toUpperCase();
+
+            if (
+                valor === "1N" ||
+                valor.includes("UNAMAR") ||
+                /(^|\W)1N($|\W)/.test(valor)
+            ) {
+                return "1N";
+            }
+
+            if (
+                valor === "RO" ||
+                valor.includes("RIO DAS OSTRAS") ||
+                /(^|\W)RO($|\W)/.test(valor)
+            ) {
+                return "RO";
+            }
+
+            return "outra";
         }
 
         function normalizarTelefone(telefone) {
             let numero = String(telefone ?? "").replace(/\D/g, "");
-            if (numero && !numero.startsWith("55")) numero = "55" + numero;
+
+            if (numero && !numero.startsWith("55")) {
+                numero = "55" + numero;
+            }
+
             return numero;
         }
 
         function gerarLink(telefone, mensagem = "") {
             const numero = normalizarTelefone(telefone);
+
             if (!numero) return "#";
-            if (!mensagem) return `https://wa.me/${numero}`;
+
+            if (!mensagem) {
+                return `https://wa.me/${numero}`;
+            }
+
             const texto = encodeURIComponent(mensagem).replace(/%20/g, "+");
+
             return `https://wa.me/${numero}?text=${texto}`;
         }
 
+        // CARREGAR ALUNOS
         async function carregarAlunos() {
             estadoConexao.textContent = "Carregando alunos da planilha...";
             container.innerHTML = "";
@@ -84,7 +243,8 @@
                 const resposta = await response.json();
 
                 if (!resposta || resposta.sucesso !== true || !Array.isArray(resposta.alunos)) {
-                    estadoConexao.textContent = resposta?.erro || "A API retornou uma resposta inválida.";
+                    estadoConexao.textContent =
+                        resposta?.erro || "A API retornou uma resposta inválida.";
                     return;
                 }
 
@@ -93,9 +253,11 @@
                     nome: aluno.nome ?? "",
                     telefone1: aluno.telefone1 ?? "",
                     telefone2: aluno.telefone2 ?? "",
+
                     telefones: Array.isArray(aluno.telefones)
                         ? aluno.telefones.filter(Boolean)
                         : [aluno.telefone1, aluno.telefone2].filter(Boolean),
+
                     responsavel: aluno.responsavel ?? "",
                     turma: String(aluno.turma ?? ""),
                     unidade: aluno.unidade ?? "",
@@ -103,193 +265,444 @@
                     pagamento: aluno.pagamento || "pendente"
                 }));
 
+                atualizarFiltros();
                 renderizarLista();
-                estadoConexao.textContent = `${alunos.length} aluno(s) carregado(s) da planilha.`;
+
+                estadoConexao.textContent =
+                    `${alunos.length} aluno(s) carregado(s) da planilha.`;
+
             } catch (erro) {
                 console.error(erro);
-                estadoConexao.textContent = "Erro ao acessar o Apps Script. Confira a URL e a implantação.";
+
+                estadoConexao.textContent =
+                    "Erro ao acessar o Apps Script. Confira a URL e a implantação.";
             }
         }
 
+        // ATUALIZAR BOTÕES DOS FILTROS
+        function atualizarFiltros() {
+
+            // Identifica os anos existentes na planilha
+            const anos = [...new Set(
+                alunos.map(aluno => obterAno(aluno.turma))
+            )].sort((a, b) => {
+                if (a === "Sem ano") return 1;
+                if (b === "Sem ano") return -1;
+
+                return Number(a) - Number(b);
+            });
+
+            // Se o ano selecionado não existir mais, volta para Todos
+            if (anoSelecionado !== "todos" && !anos.includes(anoSelecionado)) {
+                anoSelecionado = "todos";
+            }
+
+            filtroAnos.innerHTML = "";
+
+            const opcoesAno = [
+                { valor: "todos", texto: "Todos" },
+                ...anos.map(ano => ({
+                    valor: ano,
+                    texto: ano === "Sem ano" ? ano : `${ano}º Ano`
+                }))
+            ];
+
+            opcoesAno.forEach(opcao => {
+                const botao = document.createElement("button");
+
+                botao.type = "button";
+                botao.textContent = opcao.texto;
+
+                const ativo = anoSelecionado === opcao.valor;
+
+                botao.className = ativo
+                    ? "bg-white text-rose-800 px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap"
+                    : "bg-rose-700 hover:bg-rose-600 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition";
+
+                botao.addEventListener("click", () => {
+                    anoSelecionado = opcao.valor;
+                    atualizarFiltros();
+                    renderizarLista();
+                });
+
+                filtroAnos.appendChild(botao);
+            });
+
+            // Atualiza o toggle de unidades
+            filtroUnidades.querySelectorAll("[data-unidade]").forEach(botao => {
+                const ativo = botao.dataset.unidade === unidadeSelecionada;
+
+                botao.className = ativo
+                    ? "bg-white text-rose-800 px-3 py-2 text-sm font-bold rounded-md transition"
+                    : "text-white hover:bg-rose-800 px-3 py-2 text-sm font-semibold rounded-md transition";
+
+                botao.setAttribute("aria-pressed", String(ativo));
+            });
+        }
+
+        // SELECIONAR UNIDADE
+        filtroUnidades.addEventListener("click", evento => {
+            const botao = evento.target.closest("[data-unidade]");
+
+            if (!botao) return;
+
+            unidadeSelecionada = botao.dataset.unidade;
+
+            atualizarFiltros();
+            renderizarLista();
+        });
+
+        // RENDERIZAR LISTA
         function renderizarLista() {
             container.innerHTML = "";
             alunoAberto = null;
 
-            if (alunos.length === 0) {
+            // Aplica os filtros sem modificar a lista original
+            const alunosFiltrados = alunos
+                .map((aluno, index) => ({ ...aluno, index }))
+                .filter(aluno => {
+
+                    const ano = obterAno(aluno.turma);
+                    const unidade = obterUnidade(aluno.unidade);
+
+                    const correspondeAno =
+                        anoSelecionado === "todos" ||
+                        ano === anoSelecionado;
+
+                    const correspondeUnidade =
+                        unidadeSelecionada === "todas" ||
+                        unidade === unidadeSelecionada;
+
+                    return correspondeAno && correspondeUnidade;
+                });
+
+            if (alunosFiltrados.length === 0) {
                 container.innerHTML = `
-          <div class="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-600">
-            Nenhum formando encontrado na planilha.
-          </div>`;
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-600">
+                        Nenhum formando encontrado para os filtros selecionados.
+                    </div>
+                `;
                 return;
             }
 
+            // Agrupa os alunos por ano
             const anos = {};
-            alunos.forEach((aluno, index) => {
+
+            alunosFiltrados.forEach(aluno => {
                 const ano = obterAno(aluno.turma);
-                if (!anos[ano]) anos[ano] = [];
-                anos[ano].push({ ...aluno, index });
+
+                if (!anos[ano]) {
+                    anos[ano] = [];
+                }
+
+                anos[ano].push(aluno);
             });
 
             Object.keys(anos).sort((a, b) => {
                 if (a === "Sem ano") return 1;
                 if (b === "Sem ano") return -1;
+
                 return Number(a) - Number(b);
             }).forEach(ano => {
+
                 const cardAno = document.createElement("section");
-                cardAno.className = "bg-white rounded-xl shadow-sm border border-gray-200 p-5";
-                const tituloAno = ano === "Sem ano" ? ano : `${ano}º Ano`;
+
+                cardAno.className =
+                    "bg-white rounded-xl shadow-sm border border-gray-200 p-5";
+
+                const tituloAno =
+                    ano === "Sem ano" ? ano : `${ano}º Ano`;
 
                 cardAno.innerHTML = `
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-800">${escaparHTML(tituloAno)}</h2>
-            <span class="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
-              ${anos[ano].length} aluno(s)
-            </span>
-          </div>
-          <div class="space-y-3" data-lista-ano></div>
-        `;
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-800">
+                            ${escaparHTML(tituloAno)}
+                        </h2>
+
+                        <span class="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                            ${anos[ano].length} aluno(s)
+                        </span>
+                    </div>
+
+                    <div class="space-y-3" data-lista-ano></div>
+                `;
+
                 container.appendChild(cardAno);
 
                 const lista = cardAno.querySelector("[data-lista-ano]");
 
                 anos[ano].forEach(aluno => {
+
                     const cartao = document.createElement("article");
-                    cartao.className = "border border-gray-200 rounded-lg overflow-hidden";
+
+                    cartao.className =
+                        "border border-gray-200 rounded-lg overflow-hidden";
 
                     cartao.innerHTML = `
-            <button type="button" onclick="alternarAluno(${aluno.index})"
-              class="w-full flex justify-between items-center p-4 text-left hover:bg-gray-50 transition">
-              <span class="font-semibold text-gray-800">${escaparHTML(aluno.nome)}</span>
-              <span id="icone-${aluno.index}" class="text-gray-500 text-xl">+</span>
-            </button>
+                        <button type="button"
+                            onclick="alternarAluno(${aluno.index})"
+                            class="w-full flex justify-between items-center p-4 text-left hover:bg-gray-50 transition">
 
-            <div id="detalhes-${aluno.index}" class="hidden border-t border-gray-200 p-4 bg-gray-50">
-              <div class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <p class="text-xs text-gray-500 uppercase font-semibold">Responsável</p>
-                    <p class="text-gray-800">${escaparHTML(aluno.responsavel || "Não informado")}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500 uppercase font-semibold">Turma</p>
-                    <p class="text-gray-800">${escaparHTML(aluno.turma || "Não informada")}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500 uppercase font-semibold">Unidade</p>
-                    <p class="text-gray-800">${escaparHTML(aluno.unidade || "Não informada")}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500 uppercase font-semibold">ID</p>
-                    <p class="text-gray-800">${escaparHTML(aluno.id)}</p>
-                  </div>
-                </div>
+                            <span class="font-semibold text-gray-800">
+                                ${escaparHTML(aluno.nome)}
+                            </span>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label class="block">
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Atendimento</span>
-                    <select id="atendimento-${aluno.index}" onchange="salvarStatus(${aluno.index}, 'atendimento', this.value)"
-                      class="mt-1 w-full border border-gray-300 rounded-lg p-2 bg-white">
-                      <option value="tratamento" ${aluno.atendimento === "tratamento" ? "selected" : ""}>Em tratamento</option>
-                      <option value="resolvido" ${aluno.atendimento === "resolvido" ? "selected" : ""}>Resolvido</option>
-                    </select>
-                  </label>
-                  <label class="block">
-                    <span class="text-xs text-gray-500 uppercase font-semibold">Pagamento</span>
-                    <select id="pagamento-${aluno.index}" onchange="salvarStatus(${aluno.index}, 'pagamento', this.value)"
-                      class="mt-1 w-full border border-gray-300 rounded-lg p-2 bg-white">
-                      <option value="pendente" ${aluno.pagamento === "pendente" ? "selected" : ""}>Pendente</option>
-                      <option value="pago" ${aluno.pagamento === "pago" ? "selected" : ""}>Pago</option>
-                    </select>
-                  </label>
-                </div>
+                            <span id="icone-${aluno.index}"
+                                class="text-gray-500 text-xl">+</span>
+                        </button>
 
-                <div>
-                  <p class="text-xs text-gray-500 uppercase font-semibold mb-2">Telefone para contato</p>
-                  <div class="space-y-2" id="telefones-${aluno.index}"></div>
-                </div>
+                        <div id="detalhes-${aluno.index}"
+                            class="hidden border-t border-gray-200 p-4 bg-gray-50">
 
-                <div>
-                  <label class="flex items-center gap-2 text-sm text-gray-700 mb-3">
-                    <input type="checkbox" id="usar-mensagem-${aluno.index}" checked
-                      onchange="atualizarMensagem(${aluno.index})" class="w-4 h-4 accent-blue-600">
-                    Utilizar mensagem com texto
-                  </label>
-                  <textarea id="mensagem-${aluno.index}" rows="3"
-                    oninput="atualizarMensagem(${aluno.index})"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">${escaparHTML(mensagemPadrao)}</textarea>
-                </div>
+                            <div class="space-y-4">
 
-                <div class="flex flex-col sm:flex-row gap-2">
-                  <a id="whatsapp-${aluno.index}" href="#" target="_blank" rel="noopener noreferrer"
-                    class="flex-1 text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">
-                    Abrir WhatsApp
-                  </a>
-                  <button type="button" onclick="abrirWhatsApp(${aluno.index}, false)"
-                    class="flex-1 border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg transition">
-                    Somente telefone
-                  </button>
-                </div>
-                <p id="status-salvamento-${aluno.index}" class="text-xs text-gray-500" aria-live="polite"></p>
-              </div>
-            </div>
-          `;
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-semibold">
+                                            Responsável
+                                        </p>
+                                        <p class="text-gray-800">
+                                            ${escaparHTML(aluno.responsavel || "Não informado")}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-semibold">
+                                            Turma
+                                        </p>
+                                        <p class="text-gray-800">
+                                            ${escaparHTML(aluno.turma || "Não informada")}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-semibold">
+                                            Unidade
+                                        </p>
+                                        <p class="text-gray-800">
+                                            ${escaparHTML(aluno.unidade || "Não informada")}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs text-gray-500 uppercase font-semibold">
+                                            ID
+                                        </p>
+                                        <p class="text-gray-800">
+                                            ${escaparHTML(aluno.id)}
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                                    <label class="block">
+                                        <span class="text-xs text-gray-500 uppercase font-semibold">
+                                            Atendimento
+                                        </span>
+
+                                        <select id="atendimento-${aluno.index}"
+                                            onchange="salvarStatus(${aluno.index}, 'atendimento', this.value)"
+                                            class="mt-1 w-full border border-gray-300 rounded-lg p-2 bg-white">
+
+                                            <option value="tratamento" ${aluno.atendimento === "tratamento" ? "selected" : ""}>
+                                                Em tratamento
+                                            </option>
+
+                                            <option value="resolvido" ${aluno.atendimento === "resolvido" ? "selected" : ""}>
+                                                Resolvido
+                                            </option>
+
+                                        </select>
+                                    </label>
+
+                                    <label class="block">
+                                        <span class="text-xs text-gray-500 uppercase font-semibold">
+                                            Pagamento
+                                        </span>
+
+                                        <select id="pagamento-${aluno.index}"
+                                            onchange="salvarStatus(${aluno.index}, 'pagamento', this.value)"
+                                            class="mt-1 w-full border border-gray-300 rounded-lg p-2 bg-white">
+
+                                            <option value="pendente" ${aluno.pagamento === "pendente" ? "selected" : ""}>
+                                                Pendente
+                                            </option>
+
+                                            <option value="pago" ${aluno.pagamento === "pago" ? "selected" : ""}>
+                                                Pago
+                                            </option>
+
+                                        </select>
+                                    </label>
+
+                                </div>
+
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase font-semibold mb-2">
+                                        Telefone para contato
+                                    </p>
+
+                                    <div class="space-y-2" id="telefones-${aluno.index}"></div>
+                                </div>
+
+                                <div>
+
+                                    <label class="flex items-center gap-2 text-sm text-gray-700 mb-3">
+
+                                        <input type="checkbox"
+                                            id="usar-mensagem-${aluno.index}"
+                                            checked
+                                            onchange="atualizarMensagem(${aluno.index})"
+                                            class="w-4 h-4 accent-blue-600">
+
+                                        Utilizar mensagem com texto
+
+                                    </label>
+
+                                    <textarea id="mensagem-${aluno.index}"
+                                        rows="3"
+                                        oninput="atualizarMensagem(${aluno.index})"
+                                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">${escaparHTML(mensagemPadrao)}</textarea>
+
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row gap-2">
+
+                                    <a id="whatsapp-${aluno.index}"
+                                        href="#"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="flex-1 text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition">
+
+                                        Abrir WhatsApp
+
+                                    </a>
+
+                                    <button type="button"
+                                        onclick="abrirWhatsApp(${aluno.index}, false)"
+                                        class="flex-1 border border-gray-300 hover:bg-gray-100 text-gray-700 font-semibold py-3 rounded-lg transition">
+
+                                        Somente telefone
+
+                                    </button>
+
+                                </div>
+
+                                <p id="status-salvamento-${aluno.index}"
+                                    class="text-xs text-gray-500"
+                                    aria-live="polite"></p>
+
+                            </div>
+                        </div>
+                    `;
 
                     lista.appendChild(cartao);
 
-                    const listaTelefones = cartao.querySelector(`#telefones-${aluno.index}`);
+                    // Telefones do aluno
+                    const listaTelefones =
+                        cartao.querySelector(`#telefones-${aluno.index}`);
+
                     aluno.telefones.forEach((telefone, i) => {
+
                         const numero = normalizarTelefone(telefone);
+
                         const opcao = document.createElement("label");
-                        opcao.className = "flex items-center gap-3 bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-400";
+
+                        opcao.className =
+                            "flex items-center gap-3 bg-white border border-gray-200 rounded-lg p-3 cursor-pointer hover:border-blue-400";
+
                         opcao.innerHTML = `
-              <input type="radio" name="telefone-${aluno.index}" value="${escaparHTML(telefone)}"
-                ${i === 0 ? "checked" : ""} onchange="atualizarMensagem(${aluno.index})"
-                class="w-4 h-4 accent-blue-600">
-              <span class="text-sm text-gray-700">+${escaparHTML(numero)}</span>
-            `;
+                            <input type="radio"
+                                name="telefone-${aluno.index}"
+                                value="${escaparHTML(telefone)}"
+                                ${i === 0 ? "checked" : ""}
+                                onchange="atualizarMensagem(${aluno.index})"
+                                class="w-4 h-4 accent-blue-600">
+
+                            <span class="text-sm text-gray-700">
+                                +${escaparHTML(numero)}
+                            </span>
+                        `;
+
                         listaTelefones.appendChild(opcao);
                     });
 
                     if (aluno.telefones.length === 0) {
-                        listaTelefones.innerHTML = '<p class="text-sm text-gray-500">Nenhum telefone cadastrado.</p>';
+                        listaTelefones.innerHTML =
+                            '<p class="text-sm text-gray-500">Nenhum telefone cadastrado.</p>';
                     }
 
                     atualizarMensagem(aluno.index);
+
                 });
             });
         }
 
+        // ABRIR E FECHAR DETALHES DO ALUNO
         function alternarAluno(index) {
+
             if (alunoAberto !== null) {
-                document.getElementById(`detalhes-${alunoAberto}`)?.classList.add("hidden");
-                const iconeAnterior = document.getElementById(`icone-${alunoAberto}`);
-                if (iconeAnterior) iconeAnterior.textContent = "+";
+
+                document.getElementById(`detalhes-${alunoAberto}`)
+                    ?.classList.add("hidden");
+
+                const iconeAnterior =
+                    document.getElementById(`icone-${alunoAberto}`);
+
+                if (iconeAnterior) {
+                    iconeAnterior.textContent = "+";
+                }
             }
 
             if (alunoAberto === index) {
                 alunoAberto = null;
+
             } else {
                 alunoAberto = index;
-                document.getElementById(`detalhes-${index}`)?.classList.remove("hidden");
+
+                document.getElementById(`detalhes-${index}`)
+                    ?.classList.remove("hidden");
+
                 document.getElementById(`icone-${index}`).textContent = "−";
             }
         }
 
+        // ATUALIZAR LINK DO WHATSAPP
         function atualizarMensagem(index) {
-            const telefone = document.querySelector(`input[name="telefone-${index}"]:checked`);
+
+            const telefone = document.querySelector(
+                `input[name="telefone-${index}"]:checked`
+            );
+
             const link = document.getElementById(`whatsapp-${index}`);
+
             if (!telefone || !link) {
                 if (link) link.href = "#";
                 return;
             }
 
-            const usarMensagem = document.getElementById(`usar-mensagem-${index}`).checked;
-            const mensagem = document.getElementById(`mensagem-${index}`).value;
-            link.href = gerarLink(telefone.value, usarMensagem ? mensagem : "");
+            const usarMensagem =
+                document.getElementById(`usar-mensagem-${index}`).checked;
+
+            const mensagem =
+                document.getElementById(`mensagem-${index}`).value;
+
+            link.href = gerarLink(
+                telefone.value,
+                usarMensagem ? mensagem : ""
+            );
         }
 
+        // ABRIR WHATSAPP
         function abrirWhatsApp(index, comMensagem) {
-            const telefone = document.querySelector(`input[name="telefone-${index}"]:checked`);
+
+            const telefone = document.querySelector(
+                `input[name="telefone-${index}"]:checked`
+            );
+
             if (!telefone) {
                 alert("Este aluno não possui telefone cadastrado.");
                 return;
@@ -299,25 +712,41 @@
                 ? document.getElementById(`mensagem-${index}`).value
                 : "";
 
-            window.open(gerarLink(telefone.value, mensagem), "_blank", "noopener");
+            window.open(
+                gerarLink(telefone.value, mensagem),
+                "_blank",
+                "noopener"
+            );
         }
 
+        // SALVAR STATUS NA PLANILHA
         async function salvarStatus(index, campo, valor) {
+
             const aluno = alunos[index];
-            const aviso = document.getElementById(`status-salvamento-${index}`);
+
+            const aviso =
+                document.getElementById(`status-salvamento-${index}`);
+
             const valoresPermitidos = {
                 atendimento: ["tratamento", "resolvido"],
                 pagamento: ["pendente", "pago"]
             };
 
-            if (!aluno || !valoresPermitidos[campo]?.includes(valor)) return;
+            if (!aluno || !valoresPermitidos[campo]?.includes(valor)) {
+                return;
+            }
 
             aviso.textContent = "Enviando alteração...";
+
             try {
+
                 await fetch(API_URL, {
                     method: "POST",
                     mode: "no-cors",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+
                     body: JSON.stringify({
                         acao: "atualizarStatus",
                         id: aluno.id,
@@ -326,16 +755,25 @@
                     })
                 });
 
-                aviso.textContent = "Solicitação enviada. Atualize a lista para conferir se a planilha recebeu a alteração.";
+                aviso.textContent =
+                    "Solicitação enviada. Atualize a lista para conferir se a planilha recebeu a alteração.";
+
             } catch (erro) {
-                aviso.textContent = "Não foi possível enviar. Verifique sua conexão.";
+
+                aviso.textContent =
+                    "Não foi possível enviar. Verifique sua conexão.";
+
             }
         }
 
-        document.getElementById("atualizar-lista").addEventListener("click", carregarAlunos);
+        // BOTÃO ATUALIZAR
+        document.getElementById("atualizar-lista")
+            .addEventListener("click", carregarAlunos);
 
+        // INICIALIZAÇÃO
         carregarAlunos();
-    </script>
-</body>
 
+    </script>
+
+</body>
 </html>
