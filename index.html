@@ -178,7 +178,6 @@
 
         // =============================================
         // IDENTIFICAR ANO DA TURMA
-        // Valores reais da planilha: pre2, 1ano, 5ano, 9ano, 3ano
         // =============================================
         function obterAno(turma) {
             const t = normalizarTexto(turma);
@@ -199,7 +198,6 @@
                 return "3";
             }
 
-            // Fallback
             const numero = t.match(/\d+/)?.[0];
             if (numero === "2") return "Pré-2";
             if (["1", "3", "5", "9"].includes(numero)) return numero;
@@ -217,14 +215,12 @@
 
         // =============================================
         // UNIDADE
-        // - vazia → ""  (aparece nos dois filtros)
-        // - unamar / 1N → "1N"
-        // - rio das ostras / RO → "RO"
+        // vazia → aparece em 1N e RO
         // =============================================
         function obterUnidade(unidade) {
             const valor = normalizarTexto(unidade);
 
-            if (!valor) return ""; // vazia → aparece em 1N e RO
+            if (!valor) return "";
 
             if (
                 valor === "1n" ||
@@ -385,12 +381,7 @@
                 .filter(aluno => {
                     const ano = obterAno(aluno.turma);
                     const unidade = obterUnidade(aluno.unidade);
-
-                    // Ano deve bater
-                    // Unidade: se estiver vazia (""), aparece em 1N e RO
-                    // Se tiver unidade definida, só aparece no filtro correspondente
                     const unidadeOk = unidade === "" || unidade === unidadeSelecionada;
-
                     return ano === anoSelecionado && unidadeOk;
                 });
 
@@ -467,29 +458,35 @@
                                     <div>
                                         <label for="convidados-${aluno.index}"
                                             class="block text-xs text-gray-500 uppercase font-semibold mb-1">Convidados</label>
-                                        <input type="text" id="convidados-${aluno.index}"
-                                            value="${escaparHTML(aluno.convidados)}" readonly
-                                            class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm">
+                                        <input type="text"
+                                            id="convidados-${aluno.index}"
+                                            value="${escaparHTML(aluno.convidados)}"
+                                            onchange="salvarCampo(${aluno.index}, 'convidados', this.value)"
+                                            class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                     <div>
                                         <label for="foto-${aluno.index}"
                                             class="block text-xs text-gray-500 uppercase font-semibold mb-1">Foto lembrança</label>
-                                        <input type="text" id="foto-${aluno.index}"
-                                            value="${escaparHTML(aluno.fotoLembranca)}" readonly
-                                            class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm">
+                                        <input type="text"
+                                            id="foto-${aluno.index}"
+                                            value="${escaparHTML(aluno.fotoLembranca)}"
+                                            onchange="salvarCampo(${aluno.index}, 'fotoLembranca', this.value)"
+                                            class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     </div>
                                 </div>
                                 <div>
                                     <label for="observacao-${aluno.index}"
                                         class="block text-xs text-gray-500 uppercase font-semibold mb-1">Observações</label>
-                                    <textarea id="observacao-${aluno.index}" rows="3" readonly
-                                        class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white text-gray-800 resize-none focus:outline-none">${escaparHTML(aluno.observacao)}</textarea>
+                                    <textarea id="observacao-${aluno.index}"
+                                        rows="3"
+                                        onchange="salvarCampo(${aluno.index}, 'observacao', this.value)"
+                                        class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500">${escaparHTML(aluno.observacao)}</textarea>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <label class="block">
                                         <span class="text-xs text-gray-500 uppercase font-semibold">Atendimento</span>
                                         <select id="atendimento-${aluno.index}"
-                                            onchange="salvarStatus(${aluno.index}, 'atendimento', this.value)"
+                                            onchange="salvarCampo(${aluno.index}, 'atendimento', this.value)"
                                             class="mt-1 w-full border border-gray-300 rounded-lg p-2 bg-white">
                                             <option value="tratamento" ${aluno.atendimento === "tratamento" ? "selected" : ""}>Em tratamento</option>
                                             <option value="resolvido" ${aluno.atendimento === "resolvido" ? "selected" : ""}>Resolvido</option>
@@ -498,7 +495,7 @@
                                     <label class="block">
                                         <span class="text-xs text-gray-500 uppercase font-semibold">Pagamento</span>
                                         <select id="pagamento-${aluno.index}"
-                                            onchange="salvarStatus(${aluno.index}, 'pagamento', this.value)"
+                                            onchange="salvarCampo(${aluno.index}, 'pagamento', this.value)"
                                             class="mt-1 w-full border border-gray-300 rounded-lg p-2 bg-white">
                                             <option value="pendente" ${aluno.pagamento === "pendente" ? "selected" : ""}>Pendente</option>
                                             <option value="pago" ${aluno.pagamento === "pago" ? "selected" : ""}>Pago</option>
@@ -611,16 +608,23 @@
         }
 
         // =============================================
-        // SALVAR STATUS NA PLANILHA
+        // SALVAR CAMPO NA PLANILHA (genérico)
+        // Campos: atendimento, pagamento, convidados, fotoLembranca, observacao
         // =============================================
-        async function salvarStatus(index, campo, valor) {
+        async function salvarCampo(index, campo, valor) {
             const aluno = alunos[index];
             const aviso = document.getElementById(`status-salvamento-${index}`);
+            if (!aluno) return;
+
             const valoresPermitidos = {
                 atendimento: ["tratamento", "resolvido"],
                 pagamento: ["pendente", "pago"]
             };
-            if (!aluno || !valoresPermitidos[campo]?.includes(valor)) return;
+            if (valoresPermitidos[campo] && !valoresPermitidos[campo].includes(valor)) {
+                return;
+            }
+
+            aluno[campo] = valor;
 
             aviso.textContent = "Enviando alteração...";
             try {
