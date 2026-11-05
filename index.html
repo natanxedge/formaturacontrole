@@ -91,7 +91,6 @@
 
     <main class="max-w-4xl mx-auto">
 
-        <!-- CABEÇALHO -->
         <header>
 
             <div class="bg-blue-800 text-white px-4 py-5 md:px-6">
@@ -99,19 +98,11 @@
                 <div class="flex items-center gap-5">
 
                     <div class="spin-logo">
-
-                        <div class="spin-logo__name">
-                            SPIN
-                        </div>
-
-                        <div class="spin-logo__subtitle">
-                            EDUCACIONAL
-                        </div>
-
+                        <div class="spin-logo__name">SPIN</div>
+                        <div class="spin-logo__subtitle">EDUCACIONAL</div>
                     </div>
 
                     <div class="min-w-0">
-
                         <h1 class="text-xl md:text-2xl font-bold">
                             Controle de Formandos
                         </h1>
@@ -119,27 +110,22 @@
                         <p class="text-blue-100 text-xs md:text-sm mt-1">
                             Alunos, contatos, atendimento e pagamentos
                         </p>
-
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- FILTROS -->
             <div class="bg-rose-800 text-white px-3 py-2">
 
                 <div class="flex items-center gap-2 md:gap-4 min-w-0">
 
                     <div class="flex-1 min-w-0">
-
                         <div id="filtro-anos"
                             class="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
                         </div>
-
                     </div>
 
-                    <!-- UNIDADES -->
                     <div class="shrink-0">
 
                         <p class="text-[10px] font-semibold uppercase text-rose-100 text-center mb-1">
@@ -169,7 +155,6 @@
 
         </header>
 
-        <!-- CONTROLES -->
         <div class="px-4 pt-4 md:px-6">
 
             <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -189,7 +174,6 @@
 
         </div>
 
-        <!-- LISTA -->
         <div id="lista-formandos"
             class="space-y-6 px-4 pb-6 md:px-6">
         </div>
@@ -207,7 +191,6 @@
         const mensagemPadrao =
             "Olá! Estamos entrando em contato sobre a formatura escolar. Tudo bem?";
 
-        // ORDEM FIXA DA NAVEGAÇÃO
         const ORDEM_ANOS = [
             "Pré-2",
             "1",
@@ -227,7 +210,6 @@
         const filtroAnos = document.getElementById("filtro-anos");
         const filtroUnidades = document.getElementById("filtro-unidades");
 
-
         // =============================================
         // ESCAPAR HTML
         // =============================================
@@ -242,71 +224,78 @@
             })[caractere]);
         }
 
+        // =============================================
+        // NORMALIZAR TEXTO
+        // =============================================
+
+        function normalizarTexto(valor) {
+            return String(valor ?? "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, " ");
+        }
 
         // =============================================
-        // IDENTIFICAR ANO
+        // IDENTIFICAR ANO DA TURMA
+        // RECEBE DIRETAMENTE aluno.turma
         // =============================================
 
         function obterAno(turma) {
 
-            const valor = String(turma ?? "")
-                .trim()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase();
+            const valor = normalizarTexto(turma);
 
-            if (!valor) return "Sem ano";
+            if (!valor) return "";
 
-            // Identificação do Pré-2
-            const turmaPre = valor.replace(/[^a-z0-9]/g, "");
-
+            // PRÉ-2
             if (
-                /^pre0?2$/.test(turmaPre) ||
-                /^preii$/.test(turmaPre) ||
-                (/\bpre\b/.test(valor) && /\b0?2\b/.test(valor))
+                /pre\s*[-ºª°]?\s*0?2/.test(valor) ||
+                /pre\s*ii/.test(valor)
             ) {
                 return "Pré-2";
             }
 
-            // Identifica o ano quando aparece junto da palavra "ano"
-            // Exemplo: 1º Ano, 5º Ano, 2026 - 3º Ano
-            const correspondenciaAno = valor.match(
-                /(?:^|\D)(\d{1,2})\s*(?:º|°|o)?\s*ano\b/
+            // Identifica números associados a ANO ou SÉRIE.
+            // Exemplos:
+            // 1º Ano
+            // 5º Ano
+            // 9º Ano
+            // 3º Ano
+            // 2027 - 1º Ano
+            // 1ª Série
+
+            const correspondencia = valor.match(
+                /(?:^|[^\d])([1-9])\s*(?:º|ª|°|o)?\s*(?:ano|anos|serie|série)\b/
             );
 
-            if (correspondenciaAno) {
-                return String(Number(correspondenciaAno[1]));
+            if (correspondencia) {
+                return correspondencia[1];
             }
 
-            // Identifica formatos ordinais como 1º, 5° ou 9o
-            const correspondenciaOrdinal = valor.match(
-                /(?:^|\D)([1-9])\s*(?:º|°|o)(?:\s|$)/
+            // Formato ordinal sem a palavra Ano.
+            const ordinal = valor.match(
+                /(?:^|[^\d])([1-9])\s*(?:º|ª|°|o)(?:\s|$)/
             );
 
-            if (correspondenciaOrdinal) {
-                return String(Number(correspondenciaOrdinal[1]));
+            if (ordinal) {
+                return ordinal[1];
             }
 
-            // Mantém o comportamento anterior para os demais formatos:
-            // identifica o primeiro número da turma.
-            const correspondencia = valor.match(/\d+/);
-
-            if (!correspondencia) return "Sem ano";
-
-            const numeroTexto = correspondencia[0];
-            const numero = Number(numeroTexto);
-
-            if (numeroTexto.length >= 4) {
-                return String(Number(numeroTexto[0]));
+            // Campo contendo apenas o número.
+            if (/^[1-9]$/.test(valor)) {
+                return valor;
             }
 
-            if (numero >= 100) {
-                return String(Math.floor(numero / 100));
+            // Formatos como 1A, 5A, 9A ou 3A.
+            const turmaLetra = valor.match(/^([1-9])\s*[a-z]$/);
+
+            if (turmaLetra) {
+                return turmaLetra[1];
             }
 
-            return String(numero);
+            return "";
         }
-
 
         // =============================================
         // NOME DO ANO
@@ -315,11 +304,9 @@
         function nomeAno(ano) {
 
             if (ano === "Pré-2") return "Pré-2";
-            if (ano === "Sem ano") return "Sem ano";
 
             return `${ano}º Ano`;
         }
-
 
         // =============================================
         // UNIDADE
@@ -327,11 +314,7 @@
 
         function obterUnidade(unidade) {
 
-            const valor = String(unidade ?? "")
-                .trim()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toUpperCase();
+            const valor = normalizarTexto(unidade).toUpperCase();
 
             if (
                 valor === "1N" ||
@@ -352,7 +335,6 @@
             return "outra";
         }
 
-
         // =============================================
         // TELEFONES
         // =============================================
@@ -368,7 +350,6 @@
             return numero;
         }
 
-
         function gerarLink(telefone, mensagem = "") {
 
             const numero = normalizarTelefone(telefone);
@@ -383,7 +364,6 @@
 
             return `https://wa.me/${numero}?text=${texto}`;
         }
-
 
         // =============================================
         // CARREGAR ALUNOS
@@ -409,13 +389,11 @@
                     resposta.sucesso !== true ||
                     !Array.isArray(resposta.alunos)
                 ) {
-
-                    estadoConexao.textContent =
+                    throw new Error(
                         resposta?.mensagem ||
                         resposta?.erro ||
-                        "A API retornou uma resposta inválida.";
-
-                    return;
+                        "A API retornou uma resposta inválida."
+                    );
                 }
 
                 alunos = resposta.alunos.map(aluno => {
@@ -438,7 +416,10 @@
                             : [telefone1, telefone2, telefone3].filter(Boolean),
 
                         responsavel: aluno.responsavel ?? "",
-                        turma: String(aluno.turma ?? ""),
+
+                        // RECEBE O CAMPO TURMA DA PLANILHA
+                        turma: String(aluno.turma ?? "").trim(),
+
                         unidade: aluno.unidade ?? "",
 
                         atendimento: aluno.atendimento || "tratamento",
@@ -452,6 +433,14 @@
 
                 });
 
+                console.log("Turmas recebidas da planilha:");
+                console.table(alunos.map(aluno => ({
+                    nome: aluno.nome,
+                    turma: aluno.turma,
+                    anoIdentificado: obterAno(aluno.turma),
+                    unidade: aluno.unidade
+                })));
+
                 atualizarFiltros();
                 renderizarLista();
 
@@ -463,11 +452,10 @@
                 console.error(erro);
 
                 estadoConexao.textContent =
-                    "Erro ao acessar o Apps Script. Confira a URL e a implantação.";
+                    erro.message || "Erro ao acessar o Apps Script.";
 
             }
         }
-
 
         // =============================================
         // FILTROS
@@ -477,7 +465,6 @@
 
             filtroAnos.innerHTML = "";
 
-            // Exibe os cinco anos sempre na ordem solicitada
             ORDEM_ANOS.forEach(ano => {
 
                 const botao = document.createElement("button");
@@ -506,7 +493,6 @@
 
             });
 
-            // Atualiza unidade selecionada
             filtroUnidades.querySelectorAll("[data-unidade]").forEach(botao => {
 
                 const ativo = botao.dataset.unidade === unidadeSelecionada;
@@ -520,7 +506,6 @@
             });
 
         }
-
 
         // =============================================
         // SELECIONAR UNIDADE
@@ -539,7 +524,6 @@
 
         });
 
-
         // =============================================
         // RENDERIZAR LISTA
         // =============================================
@@ -553,13 +537,14 @@
                 .map((aluno, index) => ({ ...aluno, index }))
                 .filter(aluno => {
 
+                    // COMPARAÇÃO DIRETA DO CAMPO TURMA
                     const ano = obterAno(aluno.turma);
                     const unidade = obterUnidade(aluno.unidade);
 
-                    const correspondeAno = ano === anoSelecionado;
-                    const correspondeUnidade = unidade === unidadeSelecionada;
-
-                    return correspondeAno && correspondeUnidade;
+                    return (
+                        ano === anoSelecionado &&
+                        unidade === unidadeSelecionada
+                    );
 
                 });
 
@@ -626,8 +611,6 @@
 
                     cartao.innerHTML = `
 
-                        <!-- CABEÇALHO DO ALUNO -->
-
                         <button type="button"
                             onclick="alternarAluno(${aluno.index})"
                             class="w-full flex justify-between items-center p-4 text-left hover:bg-gray-50 transition">
@@ -641,14 +624,10 @@
 
                         </button>
 
-                        <!-- DETALHES -->
-
                         <div id="detalhes-${aluno.index}"
                             class="hidden border-t border-gray-200 p-4 bg-gray-50">
 
                             <div class="space-y-4">
-
-                                <!-- INFORMAÇÕES PRINCIPAIS -->
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
@@ -656,7 +635,6 @@
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
                                             Responsável
                                         </p>
-
                                         <p class="text-gray-800">
                                             ${escaparHTML(aluno.responsavel || "Não informado")}
                                         </p>
@@ -666,7 +644,6 @@
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
                                             Turma
                                         </p>
-
                                         <p class="text-gray-800">
                                             ${escaparHTML(aluno.turma || "Não informada")}
                                         </p>
@@ -676,7 +653,6 @@
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
                                             Unidade
                                         </p>
-
                                         <p class="text-gray-800">
                                             ${escaparHTML(aluno.unidade || "Não informada")}
                                         </p>
@@ -686,7 +662,6 @@
                                         <p class="text-xs text-gray-500 uppercase font-semibold">
                                             ID
                                         </p>
-
                                         <p class="text-gray-800">
                                             ${escaparHTML(aluno.id)}
                                         </p>
@@ -694,67 +669,51 @@
 
                                 </div>
 
-                                <!-- CONVIDADOS E FOTO LEMBRANÇA -->
-
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                                     <div>
-
                                         <label for="convidados-${aluno.index}"
                                             class="block text-xs text-gray-500 uppercase font-semibold mb-1">
                                             Convidados
                                         </label>
 
-                                        <input
-                                            type="text"
+                                        <input type="text"
                                             id="convidados-${aluno.index}"
                                             value="${escaparHTML(aluno.convidados)}"
                                             readonly
                                             class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm">
-
                                     </div>
 
                                     <div>
-
                                         <label for="foto-${aluno.index}"
                                             class="block text-xs text-gray-500 uppercase font-semibold mb-1">
                                             Foto lembrança
                                         </label>
 
-                                        <input
-                                            type="text"
+                                        <input type="text"
                                             id="foto-${aluno.index}"
                                             value="${escaparHTML(aluno.fotoLembranca)}"
                                             readonly
                                             class="w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm">
-
                                     </div>
 
                                 </div>
 
-                                <!-- OBSERVAÇÕES -->
-
                                 <div>
-
                                     <label for="observacao-${aluno.index}"
                                         class="block text-xs text-gray-500 uppercase font-semibold mb-1">
                                         Observações
                                     </label>
 
-                                    <textarea
-                                        id="observacao-${aluno.index}"
+                                    <textarea id="observacao-${aluno.index}"
                                         rows="3"
                                         readonly
                                         class="w-full border border-gray-300 rounded-lg p-3 text-sm bg-white text-gray-800 resize-none focus:outline-none">${escaparHTML(aluno.observacao)}</textarea>
-
                                 </div>
-
-                                <!-- ATENDIMENTO E PAGAMENTO -->
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                                     <label class="block">
-
                                         <span class="text-xs text-gray-500 uppercase font-semibold">
                                             Atendimento
                                         </span>
@@ -772,11 +731,9 @@
                                             </option>
 
                                         </select>
-
                                     </label>
 
                                     <label class="block">
-
                                         <span class="text-xs text-gray-500 uppercase font-semibold">
                                             Pagamento
                                         </span>
@@ -794,29 +751,21 @@
                                             </option>
 
                                         </select>
-
                                     </label>
 
                                 </div>
 
-                                <!-- TELEFONES -->
-
                                 <div>
-
                                     <p class="text-xs text-gray-500 uppercase font-semibold mb-2">
                                         Telefone para contato
                                     </p>
 
                                     <div class="space-y-2" id="telefones-${aluno.index}"></div>
-
                                 </div>
-
-                                <!-- MENSAGEM WHATSAPP -->
 
                                 <div>
 
                                     <label class="flex items-center gap-2 text-sm text-gray-700 mb-3">
-
                                         <input type="checkbox"
                                             id="usar-mensagem-${aluno.index}"
                                             checked
@@ -824,7 +773,6 @@
                                             class="w-4 h-4 accent-blue-600">
 
                                         Utilizar mensagem com texto
-
                                     </label>
 
                                     <textarea id="mensagem-${aluno.index}"
@@ -833,8 +781,6 @@
                                         class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">${escaparHTML(mensagemPadrao)}</textarea>
 
                                 </div>
-
-                                <!-- WHATSAPP -->
 
                                 <div class="flex flex-col sm:flex-row gap-2">
 
@@ -865,8 +811,6 @@
                     `;
 
                     lista.appendChild(cartao);
-
-                    // TELEFONES DO ALUNO
 
                     const listaTelefones =
                         cartao.querySelector(`#telefones-${aluno.index}`);
@@ -900,10 +844,8 @@
                     });
 
                     if (aluno.telefones.length === 0) {
-
                         listaTelefones.innerHTML =
                             '<p class="text-sm text-gray-500">Nenhum telefone cadastrado.</p>';
-
                     }
 
                     atualizarMensagem(aluno.index);
@@ -913,7 +855,6 @@
             });
 
         }
-
 
         // =============================================
         // ABRIR E FECHAR DETALHES
@@ -952,7 +893,6 @@
 
         }
 
-
         // =============================================
         // ATUALIZAR LINK WHATSAPP
         // =============================================
@@ -985,7 +925,6 @@
 
         }
 
-
         // =============================================
         // ABRIR WHATSAPP
         // =============================================
@@ -997,9 +936,7 @@
             );
 
             if (!telefone) {
-
                 alert("Este aluno não possui telefone cadastrado.");
-
                 return;
             }
 
@@ -1014,7 +951,6 @@
             );
 
         }
-
 
         // =============================================
         // SALVAR STATUS NA PLANILHA
@@ -1071,14 +1007,12 @@
 
         }
 
-
         // =============================================
         // BOTÃO ATUALIZAR
         // =============================================
 
         document.getElementById("atualizar-lista")
             .addEventListener("click", carregarAlunos);
-
 
         // =============================================
         // INICIALIZAÇÃO
@@ -1089,5 +1023,4 @@
     </script>
 
 </body>
-
 </html>
