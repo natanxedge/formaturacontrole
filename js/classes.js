@@ -64,10 +64,10 @@ const CLASSES = {
         rotulo: "text-xs text-gray-500 uppercase font-semibold",
         valor: "text-gray-800",
 
-        // Campos somente leitura
+        // Campos editáveis (convidados, foto lembrança, observações)
         rotuloCampo: "block text-xs text-gray-500 uppercase font-semibold mb-1",
-        input: "w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm",
-        textareaLeitura: "w-full border border-gray-300 rounded-lg p-3 text-sm bg-white text-gray-800 resize-none focus:outline-none",
+        input: "w-full border border-gray-300 rounded-lg p-2 bg-white text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500",
+        textareaCampo: "w-full border border-gray-300 rounded-lg p-3 text-sm bg-white text-gray-800 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500",
 
         // Selects de atendimento e pagamento
         selectBloco: "block",

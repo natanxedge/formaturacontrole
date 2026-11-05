@@ -154,7 +154,7 @@ function templateCartaoAluno(aluno) {
                         <input type="text"
                             id="convidados-${i}"
                             value="${escaparHTML(aluno.convidados)}"
-                            readonly
+                            onchange="salvarCampo(${i}, 'convidados', this.value)"
                             class="${C.input}">
                     </div>
 
@@ -167,7 +167,7 @@ function templateCartaoAluno(aluno) {
                         <input type="text"
                             id="foto-${i}"
                             value="${escaparHTML(aluno.fotoLembranca)}"
-                            readonly
+                            onchange="salvarCampo(${i}, 'fotoLembranca', this.value)"
                             class="${C.input}">
                     </div>
 
@@ -181,8 +181,8 @@ function templateCartaoAluno(aluno) {
 
                     <textarea id="observacao-${i}"
                         rows="3"
-                        readonly
-                        class="${C.textareaLeitura}">${escaparHTML(aluno.observacao)}</textarea>
+                        onchange="salvarCampo(${i}, 'observacao', this.value)"
+                        class="${C.textareaCampo}">${escaparHTML(aluno.observacao)}</textarea>
                 </div>
 
                 <div class="${C.grade}">
@@ -193,7 +193,7 @@ function templateCartaoAluno(aluno) {
                         </span>
 
                         <select id="atendimento-${i}"
-                            onchange="salvarStatus(${i}, 'atendimento', this.value)"
+                            onchange="salvarCampo(${i}, 'atendimento', this.value)"
                             class="${C.select}">
 
                             <option value="tratamento" ${aluno.atendimento === "tratamento" ? "selected" : ""}>
@@ -213,7 +213,7 @@ function templateCartaoAluno(aluno) {
                         </span>
 
                         <select id="pagamento-${i}"
-                            onchange="salvarStatus(${i}, 'pagamento', this.value)"
+                            onchange="salvarCampo(${i}, 'pagamento', this.value)"
                             class="${C.select}">
 
                             <option value="pendente" ${aluno.pagamento === "pendente" ? "selected" : ""}>

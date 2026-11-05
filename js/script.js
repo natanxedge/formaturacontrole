@@ -14,4 +14,7 @@ document.getElementById("atualizar-lista")
 // INICIALIZAÇÃO
 // ---------------------------------------------
 
+// Se esta linha aparecer no Console (F12), a versão nova está carregada
+console.log("Versão com campos editáveis (Convidados, Foto lembrança, Observações)");
+
 carregarAlunos();

@@ -17,3 +17,13 @@ const ORDEM_ANOS = [
     "9",
     "3"
 ];
+
+// Campos que podem ser gravados na planilha.
+// Lista = só aceita esses valores; null = texto livre.
+const CAMPOS_SALVAVEIS = {
+    atendimento: ["tratamento", "resolvido"],
+    pagamento: ["pendente", "pago"],
+    convidados: null,
+    fotoLembranca: null,
+    observacao: null
+};

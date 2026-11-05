@@ -100,22 +100,25 @@ async function carregarAlunos() {
 }
 
 // ---------------------------------------------
-// SALVAR STATUS NA PLANILHA
+// SALVAR CAMPO NA PLANILHA
+// (atendimento, pagamento, convidados,
+// foto lembrança e observações)
 // ---------------------------------------------
 
-async function salvarStatus(index, campo, valor) {
+async function salvarCampo(index, campo, valor) {
 
     const aluno = alunos[index];
 
     const aviso =
         document.getElementById(`status-salvamento-${index}`);
 
-    const valoresPermitidos = {
-        atendimento: ["tratamento", "resolvido"],
-        pagamento: ["pendente", "pago"]
-    };
+    if (!aluno || !(campo in CAMPOS_SALVAVEIS)) {
+        return;
+    }
 
-    if (!aluno || !valoresPermitidos[campo]?.includes(valor)) {
+    const permitidos = CAMPOS_SALVAVEIS[campo];
+
+    if (permitidos && !permitidos.includes(valor)) {
         return;
     }
 
@@ -123,11 +126,11 @@ async function salvarStatus(index, campo, valor) {
 
     try {
 
-        await fetch(API_URL, {
+        // Sem "no-cors": assim a resposta do Apps Script pode ser lida
+        // e o site mostra se a planilha realmente aceitou a alteração.
+        const response = await fetch(API_URL, {
 
             method: "POST",
-
-            mode: "no-cors",
 
             headers: {
                 "Content-Type": "text/plain;charset=utf-8"
@@ -142,13 +145,27 @@ async function salvarStatus(index, campo, valor) {
 
         });
 
-        aviso.textContent =
-            "Solicitação enviada. Atualize a lista para conferir se a planilha recebeu a alteração.";
+        const resposta = await response.json();
+
+        console.log("Resposta do Apps Script ao salvar:", resposta);
+
+        if (!resposta || resposta.sucesso !== true) {
+            throw new Error(
+                resposta?.mensagem || "A planilha recusou a alteração."
+            );
+        }
+
+        // Guarda o novo valor na memória, para não perder ao trocar de filtro
+        aluno[campo] = valor;
+
+        aviso.textContent = "Salvo na planilha.";
 
     } catch (erro) {
 
+        console.error("Erro ao salvar:", erro);
+
         aviso.textContent =
-            "Não foi possível enviar. Verifique sua conexão.";
+            `Não foi salvo: ${erro.message}`;
 
     }
 }
