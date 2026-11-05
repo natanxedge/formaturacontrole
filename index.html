@@ -242,21 +242,28 @@
         // RECEBE DIRETAMENTE aluno.turma
         // =============================================
 
-        function obterAno(turma) {
+function obterAno(turma) {
 
-            const valor = normalizarTexto(turma)
-                .replace(/\\s+/g, "");
+    const valor = normalizarTexto(turma);
 
-            const turmas = {
-                "pre2": "Pré-2",
-                "1ano": "1",
-                "5ano": "5",
-                "9ano": "9",
-                "3ano": "3"
-            };
+    // Pré-2 (aceita "pre2", "pre 2", "pre-2", "pré-2")
+    if (/^pre[\s\-_]*2\b/.test(valor)) {
+        return "Pré-2";
+    }
 
-            return turmas[valor] || "";
+    // Anos numerados (aceita "1º ano", "1° ano", "1 ano", "1ano", "1")
+    const match = valor.match(/^(\d{1,2})\s*[º°o]?\s*(ano)?/);
+
+    if (match) {
+        const numero = match[1];
+
+        if (["1", "3", "5", "9"].includes(numero)) {
+            return numero;
         }
+    }
+
+    return "";
+}
 
         // =============================================
         // NOME DO ANO
