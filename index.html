@@ -183,24 +183,23 @@
         function obterAno(turma) {
             const t = normalizarTexto(turma);
 
-            // Casos explícitos da planilha
-            if (t === "pre2" || t === "pre-2" || t === "pré-2" || t === "pré2") {
+            if (t === "pre2" || t === "pre-2" || t === "pré-2" || t === "pré2" || t === "pre 2") {
                 return "Pré-2";
             }
-            if (t === "1ano" || t === "1" || t.startsWith("1ano") || t.startsWith("1º")) {
+            if (t === "1ano" || t === "1" || t.startsWith("1ano") || t.startsWith("1º") || t.startsWith("1o")) {
                 return "1";
             }
-            if (t === "5ano" || t === "5" || t.startsWith("5ano") || t.startsWith("5º")) {
+            if (t === "5ano" || t === "5" || t.startsWith("5ano") || t.startsWith("5º") || t.startsWith("5o")) {
                 return "5";
             }
-            if (t === "9ano" || t === "9" || t.startsWith("9ano") || t.startsWith("9º")) {
+            if (t === "9ano" || t === "9" || t.startsWith("9ano") || t.startsWith("9º") || t.startsWith("9o")) {
                 return "9";
             }
-            if (t === "3ano" || t === "3" || t.startsWith("3ano") || t.startsWith("3º")) {
+            if (t === "3ano" || t === "3" || t.startsWith("3ano") || t.startsWith("3º") || t.startsWith("3o")) {
                 return "3";
             }
 
-            // Fallback genérico (extrai o número)
+            // Fallback
             const numero = t.match(/\d+/)?.[0];
             if (numero === "2") return "Pré-2";
             if (["1", "3", "5", "9"].includes(numero)) return numero;
@@ -218,11 +217,14 @@
 
         // =============================================
         // UNIDADE
-        // Retorna "" quando a unidade está vazia na planilha
+        // - vazia → ""  (aparece nos dois filtros)
+        // - unamar / 1N → "1N"
+        // - rio das ostras / RO → "RO"
         // =============================================
         function obterUnidade(unidade) {
             const valor = normalizarTexto(unidade);
-            if (!valor) return ""; // unidade vazia
+
+            if (!valor) return ""; // vazia → aparece em 1N e RO
 
             if (
                 valor === "1n" ||
@@ -385,7 +387,8 @@
                     const unidade = obterUnidade(aluno.unidade);
 
                     // Ano deve bater
-                    // Unidade: se estiver vazia na planilha, aparece em qualquer filtro (1N ou RO)
+                    // Unidade: se estiver vazia (""), aparece em 1N e RO
+                    // Se tiver unidade definida, só aparece no filtro correspondente
                     const unidadeOk = unidade === "" || unidade === unidadeSelecionada;
 
                     return ano === anoSelecionado && unidadeOk;
