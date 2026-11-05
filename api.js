@@ -126,11 +126,11 @@ async function salvarCampo(index, campo, valor) {
 
     try {
 
-        await fetch(API_URL, {
+        // Sem "no-cors": assim a resposta do Apps Script pode ser lida
+        // e o site mostra se a planilha realmente aceitou a alteração.
+        const response = await fetch(API_URL, {
 
             method: "POST",
-
-            mode: "no-cors",
 
             headers: {
                 "Content-Type": "text/plain;charset=utf-8"
@@ -145,16 +145,27 @@ async function salvarCampo(index, campo, valor) {
 
         });
 
+        const resposta = await response.json();
+
+        console.log("Resposta do Apps Script ao salvar:", resposta);
+
+        if (!resposta || resposta.sucesso !== true) {
+            throw new Error(
+                resposta?.mensagem || "A planilha recusou a alteração."
+            );
+        }
+
         // Guarda o novo valor na memória, para não perder ao trocar de filtro
         aluno[campo] = valor;
 
-        aviso.textContent =
-            "Solicitação enviada. Atualize a lista para conferir se a planilha recebeu a alteração.";
+        aviso.textContent = "Salvo na planilha.";
 
     } catch (erro) {
 
+        console.error("Erro ao salvar:", erro);
+
         aviso.textContent =
-            "Não foi possível enviar. Verifique sua conexão.";
+            `Não foi salvo: ${erro.message}`;
 
     }
 }
