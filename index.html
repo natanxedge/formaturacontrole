@@ -7,18 +7,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Formandos</title>
 
+    <!-- =========================================
+         BIBLIOTECA TAILWIND CSS
+    ========================================== -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Alpha+Slab+One&display=swap" rel="stylesheet">
 
+    <!-- =========================================
+         FONTES DO LOGO SPIN EDUCACIONAL
+    ========================================== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Alpha+Slab+One&family=Montserrat:wght@800&display=swap"
+        rel="stylesheet">
+
+
+    <!-- =========================================
+         CSS DO LOGO SPIN EDUCACIONAL
+    ========================================== -->
     <style>
-        .logo__spin {
-            display: inline-block;
-            font-family: 'Alpha Slab One', serif;
-            transform: scaleX(1.25);
-            transform-origin: left;
+        .spin-logo {
+            width: 190px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            flex-shrink: 0;
         }
 
+        /* Nome SPIN */
+        .spin-logo__name {
+            font-family: 'Alpha Slab One', serif;
+            font-size: clamp(2.5rem, 5vw, 3.3rem);
+            font-weight: 400;
+            color: #ffffff;
+            text-align: center;
+            line-height: 0.95;
+            letter-spacing: -1px;
+            transform: scaleY(1.12);
+            transform-origin: center bottom;
+        }
+
+        /* Faixa EDUCACIONAL */
+        .spin-logo__subtitle {
+            width: 100%;
+            background: #ffffff;
+            color: #000000;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+            text-align: center;
+            white-space: nowrap;
+            padding: 0.12em 0.08em;
+            line-height: 1.35;
+            margin-top: 4px;
+        }
+
+        /* Responsividade do logo */
+        @media (max-width: 480px) {
+            .spin-logo {
+                width: 112px;
+            }
+
+            .spin-logo__name {
+                font-size: 2.1rem;
+                letter-spacing: -1px;
+            }
+
+            .spin-logo__subtitle {
+                font-size: 0.58rem;
+                padding: 0.15em 0.03em;
+                letter-spacing: 0;
+            }
+        }
+    </style>
+
+
+    <!-- =========================================
+         CSS DOS FILTROS E BARRA DE ROLAGEM
+    ========================================== -->
+    <style>
         /* Mantém os anos em uma única linha */
         #filtro-anos {
             scrollbar-width: thin;
@@ -34,25 +102,45 @@
             border-radius: 10px;
         }
     </style>
+
 </head>
+
 
 <body class="bg-gray-100 min-h-screen">
 
     <main class="max-w-4xl mx-auto">
 
-        <!-- CABEÇALHO -->
+
+        <!-- =========================================
+             CABEÇALHO PRINCIPAL
+        ========================================== -->
         <header>
 
-            <!-- BARRA AZUL -->
+
+            <!-- =====================================
+                 BARRA AZUL - LOGO E TÍTULO
+            ====================================== -->
             <div class="bg-blue-800 text-white px-4 py-5 md:px-6">
 
                 <div class="flex items-center gap-5">
 
-                    <span class="logo__spin text-3xl md:text-4xl tracking-wide">
-                        SPIN
-                    </span>
+                    <!-- LOGO SPIN EDUCACIONAL -->
+                    <div class="spin-logo">
 
-                    <div>
+                        <div class="spin-logo__name">
+                            SPIN
+                        </div>
+
+                        <div class="spin-logo__subtitle">
+                            EDUCACIONAL
+                        </div>
+
+                    </div>
+
+
+                    <!-- TÍTULO DO SISTEMA -->
+                    <div class="min-w-0">
+
                         <h1 class="text-xl md:text-2xl font-bold">
                             Controle de Formandos
                         </h1>
@@ -60,16 +148,22 @@
                         <p class="text-blue-100 text-xs md:text-sm mt-1">
                             Alunos, contatos, atendimento e pagamentos
                         </p>
+
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- BARRA GRENÁ -->
+
+
+            <!-- =====================================
+                 BARRA GRENÁ - FILTROS
+            ====================================== -->
             <div class="bg-rose-800 text-white px-3 py-2">
 
                 <div class="flex items-center gap-2 md:gap-4 min-w-0">
+
 
                     <!-- FILTRO DE ANOS -->
                     <div class="flex-1 min-w-0">
@@ -84,6 +178,7 @@
                         </div>
 
                     </div>
+
 
                     <!-- FILTRO DE UNIDADE -->
                     <div class="shrink-0">
@@ -120,32 +215,53 @@
 
         </header>
 
-        <!-- CONTROLES DO CORPO -->
+
+
+        <!-- =========================================
+             CONTROLES DO CORPO
+        ========================================== -->
         <div class="px-4 pt-4 md:px-6">
 
             <div class="flex flex-wrap items-center gap-3 mb-4">
 
                 <button id="atualizar-lista" type="button"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+
                     Atualizar lista
+
                 </button>
 
                 <span id="estado-conexao"
                     class="text-xs text-gray-600"
                     role="status">
+
                     Carregando alunos...
+
                 </span>
 
             </div>
 
         </div>
 
-        <!-- LISTA DE FORMANDOS -->
-        <div id="lista-formandos" class="space-y-6 px-4 pb-6 md:px-6"></div>
+
+
+        <!-- =========================================
+             LISTA DE FORMANDOS
+        ========================================== -->
+        <div id="lista-formandos"
+            class="space-y-6 px-4 pb-6 md:px-6">
+        </div>
+
 
     </main>
 
+
+
+    <!-- =============================================
+         JAVASCRIPT - CONFIGURAÇÕES E VARIÁVEIS
+    ============================================== -->
     <script>
+
         // URL do Web App do Google Apps Script
         const API_URL = "https://script.google.com/macros/s/AKfycbynHPP03YCpveD0LD2R02ViTvAQP-a2rDD1GtrhI7UlLIMXBpcmGu2MBQXD5L77t_BH/exec";
 
@@ -164,6 +280,12 @@
         const filtroAnos = document.getElementById("filtro-anos");
         const filtroUnidades = document.getElementById("filtro-unidades");
 
+
+
+        // =============================================
+        // FUNÇÕES AUXILIARES
+        // =============================================
+
         function escaparHTML(valor) {
             return String(valor ?? "").replace(/[&<>"']/g, caractere => ({
                 "&": "&amp;",
@@ -173,6 +295,7 @@
                 "'": "&#39;"
             })[caractere]);
         }
+
 
         // Identifica o ano de formação a partir da turma
         function obterAno(turma) {
@@ -197,6 +320,7 @@
 
             return String(numero);
         }
+
 
         // Padroniza a identificação da unidade
         function obterUnidade(unidade) {
@@ -225,6 +349,8 @@
             return "outra";
         }
 
+
+        // Normaliza telefone
         function normalizarTelefone(telefone) {
             let numero = String(telefone ?? "").replace(/\D/g, "");
 
@@ -235,6 +361,8 @@
             return numero;
         }
 
+
+        // Gera link do WhatsApp
         function gerarLink(telefone, mensagem = "") {
             const numero = normalizarTelefone(telefone);
 
@@ -249,7 +377,12 @@
             return `https://wa.me/${numero}?text=${texto}`;
         }
 
+
+
+        // =============================================
         // CARREGAR ALUNOS
+        // =============================================
+
         async function carregarAlunos() {
             estadoConexao.textContent = "Carregando alunos da planilha...";
             container.innerHTML = "";
@@ -300,7 +433,12 @@
             }
         }
 
-        // ATUALIZAR BOTÕES DOS FILTROS
+
+
+        // =============================================
+        // FILTROS - ANOS E UNIDADES
+        // =============================================
+
         function atualizarFiltros() {
 
             const anos = [...new Set(
@@ -349,6 +487,7 @@
                 filtroAnos.appendChild(botao);
             });
 
+
             // Atualiza o toggle de unidades
             filtroUnidades.querySelectorAll("[data-unidade]").forEach(botao => {
                 const ativo = botao.dataset.unidade === unidadeSelecionada;
@@ -361,7 +500,12 @@
             });
         }
 
+
+
+        // =============================================
         // SELECIONAR UNIDADE
+        // =============================================
+
         filtroUnidades.addEventListener("click", evento => {
             const botao = evento.target.closest("[data-unidade]");
 
@@ -373,7 +517,12 @@
             renderizarLista();
         });
 
-        // RENDERIZAR LISTA
+
+
+        // =============================================
+        // RENDERIZAR LISTA DE FORMANDOS
+        // =============================================
+
         function renderizarLista() {
             container.innerHTML = "";
             alunoAberto = null;
@@ -396,6 +545,8 @@
                     return correspondeAno && correspondeUnidade;
                 });
 
+
+            // Mensagem quando não existem resultados
             if (alunosFiltrados.length === 0) {
                 container.innerHTML = `
                     <div class="bg-white border border-gray-200 rounded-xl p-6 text-center text-gray-600">
@@ -405,6 +556,8 @@
                 return;
             }
 
+
+            // Agrupar alunos por ano
             const anos = {};
 
             alunosFiltrados.forEach(aluno => {
@@ -417,6 +570,8 @@
                 anos[ano].push(aluno);
             });
 
+
+            // Criar cartões de cada ano
             Object.keys(anos).sort((a, b) => {
                 if (a === "Sem ano") return 1;
                 if (b === "Sem ano") return -1;
@@ -450,6 +605,8 @@
 
                 const lista = cardAno.querySelector("[data-lista-ano]");
 
+
+                // Criar cartão individual do aluno
                 anos[ano].forEach(aluno => {
 
                     const cartao = document.createElement("article");
@@ -515,6 +672,8 @@
 
                                 </div>
 
+
+                                <!-- ATENDIMENTO E PAGAMENTO -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
                                     <label class="block">
@@ -536,6 +695,7 @@
 
                                         </select>
                                     </label>
+
 
                                     <label class="block">
                                         <span class="text-xs text-gray-500 uppercase font-semibold">
@@ -559,6 +719,8 @@
 
                                 </div>
 
+
+                                <!-- TELEFONES -->
                                 <div>
                                     <p class="text-xs text-gray-500 uppercase font-semibold mb-2">
                                         Telefone para contato
@@ -567,6 +729,8 @@
                                     <div class="space-y-2" id="telefones-${aluno.index}"></div>
                                 </div>
 
+
+                                <!-- MENSAGEM DO WHATSAPP -->
                                 <div>
 
                                     <label class="flex items-center gap-2 text-sm text-gray-700 mb-3">
@@ -588,6 +752,8 @@
 
                                 </div>
 
+
+                                <!-- BOTÕES DO WHATSAPP -->
                                 <div class="flex flex-col sm:flex-row gap-2">
 
                                     <a id="whatsapp-${aluno.index}"
@@ -610,6 +776,8 @@
 
                                 </div>
 
+
+                                <!-- STATUS DE SALVAMENTO -->
                                 <p id="status-salvamento-${aluno.index}"
                                     class="text-xs text-gray-500"
                                     aria-live="polite"></p>
@@ -620,7 +788,11 @@
 
                     lista.appendChild(cartao);
 
-                    // Telefones do aluno
+
+                    // =================================
+                    // TELEFONES DO ALUNO
+                    // =================================
+
                     const listaTelefones =
                         cartao.querySelector(`#telefones-${aluno.index}`);
 
@@ -649,6 +821,7 @@
                         listaTelefones.appendChild(opcao);
                     });
 
+
                     if (aluno.telefones.length === 0) {
                         listaTelefones.innerHTML =
                             '<p class="text-sm text-gray-500">Nenhum telefone cadastrado.</p>';
@@ -657,10 +830,16 @@
                     atualizarMensagem(aluno.index);
 
                 });
+
             });
         }
 
+
+
+        // =============================================
         // ABRIR E FECHAR DETALHES DO ALUNO
+        // =============================================
+
         function alternarAluno(index) {
 
             if (alunoAberto !== null) {
@@ -689,7 +868,12 @@
             }
         }
 
+
+
+        // =============================================
         // ATUALIZAR LINK DO WHATSAPP
+        // =============================================
+
         function atualizarMensagem(index) {
 
             const telefone = document.querySelector(
@@ -715,7 +899,12 @@
             );
         }
 
+
+
+        // =============================================
         // ABRIR WHATSAPP
+        // =============================================
+
         function abrirWhatsApp(index, comMensagem) {
 
             const telefone = document.querySelector(
@@ -738,7 +927,12 @@
             );
         }
 
+
+
+        // =============================================
         // SALVAR STATUS NA PLANILHA
+        // =============================================
+
         async function salvarStatus(index, campo, valor) {
 
             const aluno = alunos[index];
@@ -785,14 +979,25 @@
             }
         }
 
-        // BOTÃO ATUALIZAR
+
+
+        // =============================================
+        // BOTÃO ATUALIZAR LISTA
+        // =============================================
+
         document.getElementById("atualizar-lista")
             .addEventListener("click", carregarAlunos);
 
-        // INICIALIZAÇÃO
+
+
+        // =============================================
+        // INICIALIZAÇÃO DO SISTEMA
+        // =============================================
+
         carregarAlunos();
 
     </script>
 
 </body>
+
 </html>
