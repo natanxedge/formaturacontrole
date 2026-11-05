@@ -253,45 +253,47 @@
 
 
         // Identifica o ano de formação a partir da turma
-        function obterAno(turma) {
+function obterAno(turma) {
 
-            const valor = String(turma ?? "").trim();
+    const valor = String(turma ?? "")
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
 
-            if (!valor) return "Sem ano";
+    if (!valor) return "Sem ano";
 
-            // Identifica Pré-2 antes de procurar números
-            const turmaNormalizada = valor
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase()
-                .replace(/\s+/g, "");
+    // Identifica turmas da educação infantil
+    // Aceita: Pré-2, Pre 2, Pre-02, PRE2, Pré II etc.
+    const turmaPre = valor.replace(/[^a-z0-9]/g, "");
 
-            if (
-                turmaNormalizada === "pre-2" ||
-                turmaNormalizada === "pre2" ||
-                turmaNormalizada === "pre02"
-            ) {
-                return "Pré-2";
-            }
+    if (/^pre0?2$/.test(turmaPre) || /^preii$/.test(turmaPre)) {
+        return "Pré-2";
+    }
 
-            const correspondencia = valor.match(/\d+/);
+    // Identifica turmas com a palavra pré
+    if (/\bpre\b/.test(valor) && /\b0?2\b/.test(valor)) {
+        return "Pré-2";
+    }
 
-            if (!correspondencia) return "Sem ano";
+    // Identifica os demais anos
+    const correspondencia = valor.match(/\d+/);
 
-            const numeroTexto = correspondencia[0];
-            const numero = Number(numeroTexto);
+    if (!correspondencia) return "Sem ano";
 
-            if (numeroTexto.length >= 4) {
-                return String(Number(numeroTexto[0]));
-            }
+    const numeroTexto = correspondencia[0];
+    const numero = Number(numeroTexto);
 
-            if (numero >= 100) {
-                return String(Math.floor(numero / 100));
-            }
+    if (numeroTexto.length >= 4) {
+        return String(Number(numeroTexto[0]));
+    }
 
-            return String(numero);
-        }
+    if (numero >= 100) {
+        return String(Math.floor(numero / 100));
+    }
 
+    return String(numero);
+}
 
         // Ordenação dos anos
         function ordenarAnos(a, b) {
