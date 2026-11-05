@@ -1,0 +1,76 @@
+/* =============================================
+   LOGO SPIN EDUCACIONAL
+   ============================================= */
+
+.spin-logo {
+    width: 190px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    flex-shrink: 0;
+    background: #ffffff;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.spin-logo__name {
+    font-family: 'Alpha Slab One', serif;
+    font-size: clamp(2.5rem, 5vw, 3.3rem);
+    font-weight: 400;
+    color: #000000;
+    text-align: center;
+    line-height: 0.95;
+    letter-spacing: -1px;
+    transform: scaleY(1.12);
+    transform-origin: center bottom;
+}
+
+.spin-logo__subtitle {
+    width: 100%;
+    background: #000000;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: clamp(0.75rem, 1.5vw, 0.95rem);
+    text-align: center;
+    white-space: nowrap;
+    padding: 0.12em 0.08em;
+    line-height: 1.35;
+    margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+    .spin-logo {
+        width: 112px;
+        padding: 5px;
+    }
+
+    .spin-logo__name {
+        font-size: 2.1rem;
+        letter-spacing: -1px;
+    }
+
+    .spin-logo__subtitle {
+        font-size: 0.58rem;
+        padding: 0.15em 0.03em;
+        letter-spacing: 0;
+    }
+}
+
+/* =============================================
+   BARRA DE ROLAGEM DO FILTRO DE ANOS
+   ============================================= */
+
+#filtro-anos {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+}
+
+#filtro-anos::-webkit-scrollbar {
+    height: 3px;
+}
+
+#filtro-anos::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
