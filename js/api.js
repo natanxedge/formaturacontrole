@@ -75,6 +75,15 @@ async function carregarAlunos() {
 
         alunos = resposta.alunos.map(mapearAluno);
 
+        // Diagnóstico: o Apps Script informa quais colunas não achou na planilha
+        const naoEncontradas = resposta.colunasNaoEncontradas || [];
+
+        console.log("Cabeçalhos da planilha:", resposta.cabecalhos);
+
+        if (naoEncontradas.length > 0) {
+            console.warn("Colunas não encontradas na planilha:", naoEncontradas);
+        }
+
         console.log("Turmas recebidas da planilha:");
         console.table(alunos.map(aluno => ({
             nome: aluno.nome,
@@ -87,7 +96,10 @@ async function carregarAlunos() {
         renderizarLista();
 
         estadoConexao.textContent =
-            `${alunos.length} aluno(s) carregado(s) da planilha.`;
+            `${alunos.length} aluno(s) carregado(s) da planilha.` +
+            (naoEncontradas.length > 0
+                ? ` Atenção: coluna(s) não encontrada(s): ${naoEncontradas.join(", ")}.`
+                : "");
 
     } catch (erro) {
 
