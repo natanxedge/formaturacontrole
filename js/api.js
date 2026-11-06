@@ -53,7 +53,12 @@ async function carregarAlunos() {
 
     try {
 
-        const response = await fetch(`${API_URL}?acao=listar`);
+        // "no-store" + parâmetro com a hora: garante dados novos da planilha,
+        // nunca uma resposta antiga guardada pelo navegador.
+        const response = await fetch(
+            `${API_URL}?acao=listar&_=${Date.now()}`,
+            { cache: "no-store" }
+        );
 
         if (!response.ok) {
             throw new Error("Falha na resposta do servidor");
@@ -86,11 +91,24 @@ async function carregarAlunos() {
 
         console.log("Turmas recebidas da planilha:");
         console.table(alunos.map(aluno => ({
+            id: aluno.id,
             nome: aluno.nome,
             turma: aluno.turma,
             anoIdentificado: obterAno(aluno.turma),
-            unidade: aluno.unidade
+            unidade: aluno.unidade,
+            convidados: aluno.convidados,
+            fotoLembranca: aluno.fotoLembranca,
+            observacao: aluno.observacao
         })));
+
+        // O salvamento localiza a linha pelo ID: IDs repetidos gravam na linha errada
+        const idsRepetidos = alunos
+            .map(aluno => aluno.id)
+            .filter((id, posicao, lista) => lista.indexOf(id) !== posicao);
+
+        if (idsRepetidos.length > 0) {
+            console.warn("IDs repetidos na planilha:", [...new Set(idsRepetidos)]);
+        }
 
         atualizarFiltros();
         renderizarLista();
